@@ -6,17 +6,23 @@ Thanks for considering a contribution to Abra.
 
 Prerequisites:
 
-- Go 1.25.11 or newer.
-- Node.js 24 or newer.
+- Go 1.25.13 or newer.
+- Node.js 24.20.0 for reproducible maintainer checks (`package.json` supports 24 or newer).
+- Helm 3.21.4 for deployment and release checks.
 - Docker or a compatible container runtime for full release-gate checks.
 - Postgres with `pgvector` for local integration testing.
 
 Run the fast checks:
 
 ```sh
+npm ci
 go test ./...
 npm test
 ```
+
+`go.mod` and `package.json` are the toolchain requirements; `package-lock.json`
+is the locked Node dependency graph. Use `npm ci`, rather than `npm install`,
+when reproducing CI from a clean checkout.
 
 Read the Architecture map before moving boundaries or adding user-facing
 surface:

@@ -11,11 +11,15 @@ permissions:
 jobs:
   preflight:
     name: release preflight
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24.20.0"
 
       - name: Verify release tag and version metadata
         env:
@@ -118,7 +122,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "24"
+          node-version: "24.20.0"
           cache: npm
 
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
@@ -131,6 +135,8 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        with:
+          version: v3.21.4
 
       - name: Run Go vulnerability check
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.4.0 ./...
@@ -159,7 +165,7 @@ jobs:
   build:
     name: build ${{ matrix.os }} ${{ matrix.arch }}
     needs: release_gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -208,7 +214,7 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -294,7 +300,7 @@ jobs:
       artifact-metadata: write
       contents: write
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4

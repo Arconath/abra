@@ -255,14 +255,16 @@ published artifacts are CLI archives plus container images.
 
 Prerequisites:
 
-- Go 1.25.11 or newer
-- Node.js 24 or newer for maintainer scripts
+- Go 1.25.13 or newer
+- Node.js 24.20.0 for reproducible maintainer checks (`package.json` supports 24 or newer)
+- Helm 3.21.4 for deployment and release checks
 - Docker or a compatible runtime for full release-gate checks
 - Postgres with `pgvector` for local integration testing
 
 Run fast checks:
 
 ```sh
+npm ci
 go test ./...
 npm test
 ```

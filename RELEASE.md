@@ -1,6 +1,11 @@
 # Release Process
 
-Abra releases should be reproducible from a signed Git tag and backed by CI evidence.
+Abra releases should be rebuildable and auditable from a signed Git tag and
+backed by CI evidence. The release process does not promise byte-for-byte
+reproducible archives or images.
+
+Use Node.js 24.20.0 and Helm 3.21.4 for the checks below; CI pins the same
+versions. The minimum Go patch is declared in `go.mod`.
 
 ## Versioning
 
@@ -126,41 +131,36 @@ uploading the release assets.
 Download release artifacts and verify checksums:
 
 ```sh
+# Linux
 sha256sum -c SHA256SUMS
+
+# macOS
+shasum -a 256 -c SHA256SUMS
 ```
 
 Verify artifact provenance with GitHub CLI for every archive, the runtime bundle, `install.sh`,
 `SHA256SUMS`, `IMAGE_DIGEST`, and `abra-release-gate.json`:
 
 ```sh
-gh attestation verify --repo OWNER/REPO abra_linux_amd64.tar.gz
-gh attestation verify --repo OWNER/REPO abra_runtime_vX.Y.Z.tar.gz
-gh attestation verify --repo OWNER/REPO install.sh
-gh attestation verify --repo OWNER/REPO SHA256SUMS
-gh attestation verify --repo OWNER/REPO IMAGE_DIGEST
-gh attestation verify --repo OWNER/REPO abra-release-gate.json
+gh attestation verify --repo hermawan22/abra abra_linux_amd64.tar.gz
+gh attestation verify --repo hermawan22/abra abra_runtime_vX.Y.Z.tar.gz
+gh attestation verify --repo hermawan22/abra install.sh
+gh attestation verify --repo hermawan22/abra SHA256SUMS
+gh attestation verify --repo hermawan22/abra IMAGE_DIGEST
+gh attestation verify --repo hermawan22/abra abra-release-gate.json
 ```
 
 Hardened install-script verification:
 
 ```sh
-curl -fsSLO https://github.com/OWNER/REPO/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo OWNER/REPO install.sh
+curl -fsSLO https://github.com/hermawan22/abra/releases/download/vX.Y.Z/install.sh
+gh attestation verify --repo hermawan22/abra install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 
 The hardened installer path must install from the release archive for the
 detected platform. Do not set `ABRA_ALLOW_SOURCE_BUILD=1` when verifying a
 published release.
-
-For immutable installer provenance, download the release-pinned installer asset
-and verify its attestation before executing it:
-
-```sh
-curl -fsSLO https://github.com/OWNER/REPO/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo OWNER/REPO install.sh
-ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
-```
 
 The release workflow also runs the installer against the staged `dist`
 directory before uploading assets by setting `ABRA_RELEASE_BASE_URL` to a local
@@ -181,7 +181,7 @@ Verify and promote the first-party GHCR image by digest:
 ```sh
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 docker buildx imagetools inspect "$image_ref"
-gh attestation verify "oci://${image_ref}" --repo OWNER/REPO
+gh attestation verify "oci://${image_ref}" --repo hermawan22/abra
 ```
 
 The first line of `IMAGE_DIGEST` is the digest-pinned image reference to use in
