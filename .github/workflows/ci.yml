@@ -15,26 +15,34 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-24.04
-
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_USER: abra
-          POSTGRES_PASSWORD: abra
-          POSTGRES_DB: abra
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U abra -d abra"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
 
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Enforce centralized runner contract
+        run: scripts/ci/check-runner-contract.sh
+
+      - name: Start isolated PostgreSQL
+        run: |
+          test ! -S /var/run/docker.sock
+          container="abra-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          podman run --detach --rm --name "$container" \
+            --publish 127.0.0.1:5433:5432 \
+            --env POSTGRES_USER=abra \
+            --env POSTGRES_PASSWORD=abra \
+            --env POSTGRES_DB=abra \
+            pgvector/pgvector:pg16
+          printf 'ABRA_POSTGRES_CONTAINER=%s\n' "$container" >>"$GITHUB_ENV"
+          for _ in $(seq 1 40); do
+            podman exec "$container" pg_isready -U abra -d abra && exit 0
+            sleep 2
+          done
+          podman logs "$container" >&2
+          exit 1
 
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -97,7 +105,7 @@ jobs:
           EMBEDDING_DIMENSIONS=1536
           ALLOW_LOCAL_EMBEDDINGS_IN_PRODUCTION=false
           EOF
-          docker compose --env-file /tmp/abra.env.production.test --profile setup config >/tmp/abra-compose-config.yaml
+          podman compose --env-file /tmp/abra.env.production.test --profile setup config >/tmp/abra-compose-config.yaml
 
       - name: Check public repo hygiene
         run: npm run check:oss
@@ -110,4 +118,8 @@ jobs:
           go build ./cmd/abra
 
       - name: Build container image
-        run: docker build -t abra:${{ github.sha }} .
+        run: podman build -t abra:${{ github.sha }} .
+
+      - name: Stop isolated PostgreSQL
+        if: ${{ always() }}
+        run: podman rm --force "$ABRA_POSTGRES_CONTAINER" >/dev/null 2>&1 || true

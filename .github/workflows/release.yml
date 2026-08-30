@@ -11,7 +11,9 @@ permissions:
 jobs:
   preflight:
     name: release preflight
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -116,7 +118,9 @@ jobs:
   release_gate:
     name: release gate
     needs: preflight
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -165,9 +169,12 @@ jobs:
   build:
     name: build ${{ matrix.os }} ${{ matrix.arch }}
     needs: release_gate
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - os: linux
@@ -214,54 +221,82 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+      - name: Authenticate rootless registry client
+        env:
+          REGISTRY_TOKEN: ${{ github.token }}
+        run: |
+          test ! -S /var/run/docker.sock
+          auth_dir="$RUNNER_TEMP/registry-auth"
+          mkdir -p "$auth_dir"
+          printf '%s' "$REGISTRY_TOKEN" | podman login --authfile "$auth_dir/config.json" \
+            ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          printf 'REGISTRY_AUTH_FILE=%s\nDOCKER_CONFIG=%s\n' \
+            "$auth_dir/config.json" "$auth_dir" >>"$GITHUB_ENV"
 
       - name: Set image metadata
         id: image_metadata
         run: |
           set -euo pipefail
-          echo "image_name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-          echo "image_version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-          echo "build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          {
+            echo "image_name=ghcr.io/${GITHUB_REPOSITORY,,}"
+            echo "image_version=${GITHUB_REF_NAME#v}"
+            echo "build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build and push image
         id: image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         env:
-          DOCKER_BUILD_RECORD_UPLOAD: "false"
+          IMAGE_NAME: ${{ steps.image_metadata.outputs.image_name }}
+          IMAGE_VERSION: ${{ steps.image_metadata.outputs.image_version }}
+          BUILD_DATE: ${{ steps.image_metadata.outputs.build_date }}
+        run: |
+          set -Eeuo pipefail
+          manifest="${IMAGE_NAME}:candidate-${GITHUB_SHA}"
+          podman build --platform linux/amd64,linux/arm64 --manifest "$manifest" \
+            --label org.opencontainers.image.title=Abra \
+            --label 'org.opencontainers.image.description=CLI-first governed brain layer for AI agents' \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.version=${GITHUB_REF_NAME}" \
+            --build-arg "ABRA_VERSION=${GITHUB_REF_NAME}" \
+            --build-arg "ABRA_COMMIT=${GITHUB_SHA}" \
+            --build-arg "ABRA_DATE=${BUILD_DATE}" .
+          digest=''
+          for tag in "$GITHUB_REF_NAME" "$IMAGE_VERSION" "$GITHUB_SHA"; do
+            digest_file="$RUNNER_TEMP/abra-${tag//\//_}.digest"
+            podman manifest push --all --digestfile "$digest_file" "$manifest" "docker://${IMAGE_NAME}:${tag}"
+            candidate_digest="$(cat "$digest_file")"
+            [[ "$candidate_digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+            if [[ -z "$digest" ]]; then digest="$candidate_digest"; else [[ "$candidate_digest" == "$digest" ]]; fi
+          done
+          printf 'digest=%s\n' "$digest" >>"$GITHUB_OUTPUT"
+
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@a930d0ac434e3182448fe678398ba5713717112a
         with:
-          context: .
-          file: Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ steps.image_metadata.outputs.image_name }}:${{ github.ref_name }}
-            ${{ steps.image_metadata.outputs.image_name }}:${{ steps.image_metadata.outputs.image_version }}
-            ${{ steps.image_metadata.outputs.image_name }}:${{ github.sha }}
-          labels: |
-            org.opencontainers.image.title=Abra
-            org.opencontainers.image.description=CLI-first governed brain layer for AI agents
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ github.ref_name }}
-          build-args: |
-            ABRA_VERSION=${{ github.ref_name }}
-            ABRA_COMMIT=${{ github.sha }}
-            ABRA_DATE=${{ steps.image_metadata.outputs.build_date }}
-          provenance: mode=max
-          sbom: true
+          image: ${{ steps.image_metadata.outputs.image_name }}@${{ steps.image.outputs.digest }}
+          format: spdx-json
+          output-file: abra-image.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+        with:
+          cosign-release: v3.1.3
+
+      - name: Sign and attest image SBOM
+        run: |
+          image="${{ steps.image_metadata.outputs.image_name }}@${{ steps.image.outputs.digest }}"
+          cosign sign --yes "$image"
+          cosign attest --yes --type spdxjson --predicate abra-image.spdx.json "$image"
 
       - name: Attest image provenance
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
@@ -300,7 +335,9 @@ jobs:
       artifact-metadata: write
       contents: write
       id-token: write
-    runs-on: ubuntu-24.04
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4

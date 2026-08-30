@@ -14,6 +14,7 @@ const keepSourceActive = process.env.ABRA_DOGFOOD_KEEP_SOURCE_ACTIVE === "1";
 const timeoutMs = Number(process.env.ABRA_DOGFOOD_TIMEOUT_MS || 600000);
 const pollMs = Number(process.env.ABRA_DOGFOOD_POLL_MS || 2000);
 const requestTimeoutMs = Number(process.env.ABRA_DOGFOOD_REQUEST_TIMEOUT_MS || 30000);
+const containerCli = process.env.ABRA_CONTAINER_CLI || "podman";
 const mcpTool = createMCPToolCaller({ baseUrl, token, timeoutMs: requestTimeoutMs });
 
 requireTokenForRemoteBaseURL(baseUrl);
@@ -54,9 +55,9 @@ function prepareDockerSourceForWorker() {
   const envFile = process.env.ABRA_ENV_FILE || ".tmp/quickstart.env";
   const target = process.env.ABRA_DOGFOOD_CONTAINER_SOURCE_ROOT || "/tmp/abra-src";
   const command = [
-    `docker compose --env-file ${shellQuote(envFile)} exec -T worker sh -lc ${shellQuote(`rm -rf -- ${target} && mkdir -p -- ${target}`)}`,
-    `COPYFILE_DISABLE=1 tar --exclude .tmp --exclude node_modules --exclude .git --exclude '._*' --no-xattrs -cf - . | docker compose --env-file ${shellQuote(envFile)} exec -T worker tar -C ${shellQuote(target)} -xf -`,
-    `docker compose --env-file ${shellQuote(envFile)} exec -T worker sh -lc ${shellQuote(`test -f ${target}/README.md && test -f ${target}/go.mod && find ${target} -name '._*' -delete`)}`,
+    `${containerCli} compose --env-file ${shellQuote(envFile)} exec -T worker sh -lc ${shellQuote(`rm -rf -- ${target} && mkdir -p -- ${target}`)}`,
+    `COPYFILE_DISABLE=1 tar --exclude .tmp --exclude node_modules --exclude .git --exclude '._*' --no-xattrs -cf - . | ${containerCli} compose --env-file ${shellQuote(envFile)} exec -T worker tar -C ${shellQuote(target)} -xf -`,
+    `${containerCli} compose --env-file ${shellQuote(envFile)} exec -T worker sh -lc ${shellQuote(`test -f ${target}/README.md && test -f ${target}/go.mod && find ${target} -name '._*' -delete`)}`,
   ].join(" && ");
   const result = spawnSync("sh", ["-lc", command], {
     cwd: repoPath,

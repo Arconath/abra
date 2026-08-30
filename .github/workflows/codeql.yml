@@ -18,9 +18,13 @@ concurrency:
 
 jobs:
   analyze:
-    runs-on: ubuntu-24.04
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         language: ["go", "javascript-typescript"]
     steps:

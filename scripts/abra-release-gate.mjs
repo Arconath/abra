@@ -565,7 +565,7 @@ async function main() {
 		await runCommand("eval_tier23", "npm", ["run", "eval:tier23"], { env: tier23Env() });
     if (approvalEnforcementGate) {
       if (manageStack) {
-        await runCommand("docker_compose_enforce_up", "docker", ["compose", ...composeDevFiles, "up", "-d", "--force-recreate", "api", "worker"], {
+		await runCommand("podman_compose_enforce_up", process.env.ABRA_CONTAINER_CLI || "podman", ["compose", ...composeDevFiles, "up", "-d", "--force-recreate", "api", "worker"], {
           env: {
             ...managedStackEnv,
             ABRA_APPROVAL_MODE: "enforce",
@@ -577,7 +577,7 @@ async function main() {
 				env: tier23Env({ ABRA_TIER23_EXPECT_APPROVAL_ENFORCEMENT: "1" })
 			});
       if (manageStack) {
-        await runCommand("docker_compose_advisory_up", "docker", ["compose", ...composeDevFiles, "up", "-d", "--force-recreate", "api", "worker"], {
+		await runCommand("podman_compose_advisory_up", process.env.ABRA_CONTAINER_CLI || "podman", ["compose", ...composeDevFiles, "up", "-d", "--force-recreate", "api", "worker"], {
           env: managedStackEnv
         });
         await waitForReady("managed_stack_ready_advisory");
@@ -585,16 +585,16 @@ async function main() {
     }
     if (prepareDogfoodSource) {
       const quotedDogfoodRoot = shellArg(dogfoodContainerSourceRoot);
-      await runCommand("prepare_dogfood_source_dir", "docker", ["compose", ...composeDevFiles, "exec", "-T", "worker", "sh", "-lc", `rm -rf -- ${quotedDogfoodRoot} && mkdir -p -- ${quotedDogfoodRoot}`], {
+      await runCommand("prepare_dogfood_source_dir", process.env.ABRA_CONTAINER_CLI || "podman", ["compose", ...composeDevFiles, "exec", "-T", "worker", "sh", "-lc", `rm -rf -- ${quotedDogfoodRoot} && mkdir -p -- ${quotedDogfoodRoot}`], {
         env: managedStackEnv
       });
       await runCommand("prepare_dogfood_source_copy", "bash", [
         "-lc",
-        `COPYFILE_DISABLE=1 tar --exclude .tmp --exclude node_modules --exclude .git --exclude '._*' --no-xattrs -cf - . | docker compose -f docker-compose.yml -f docker-compose.dev.yml exec -T worker tar -C ${quotedDogfoodRoot} -xf -`
+        `COPYFILE_DISABLE=1 tar --exclude .tmp --exclude node_modules --exclude .git --exclude '._*' --no-xattrs -cf - . | ${process.env.ABRA_CONTAINER_CLI || "podman"} compose -f docker-compose.yml -f docker-compose.dev.yml exec -T worker tar -C ${quotedDogfoodRoot} -xf -`
       ], {
         env: managedStackEnv
       });
-      await runCommand("prepare_dogfood_source_clean", "docker", ["compose", ...composeDevFiles, "exec", "-T", "worker", "find", dogfoodContainerSourceRoot, "-name", "._*", "-delete"], {
+      await runCommand("prepare_dogfood_source_clean", process.env.ABRA_CONTAINER_CLI || "podman", ["compose", ...composeDevFiles, "exec", "-T", "worker", "find", dogfoodContainerSourceRoot, "-name", "._*", "-delete"], {
         env: managedStackEnv
       });
     }

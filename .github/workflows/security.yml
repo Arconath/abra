@@ -18,7 +18,10 @@ concurrency:
 
 jobs:
   vulnerability-checks:
-    runs-on: ubuntu-24.04
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
