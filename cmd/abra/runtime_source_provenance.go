@@ -30,7 +30,7 @@ func runtimeSourceURL() string {
 		return value
 	}
 	if runtimeVersion() == "main" {
-		return "https://github.com/hermawan22/abra/archive/refs/heads/main.tar.gz"
+		return "https://github.com/Arconath/abra/archive/refs/heads/main.tar.gz"
 	}
 	return runtimeReleaseAssetURL(runtimeBundleAssetName())
 }

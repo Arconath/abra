@@ -1,6 +1,11 @@
 # Release Process
 
-Abra releases should be reproducible from a signed Git tag and backed by CI evidence.
+Abra releases should be rebuildable and auditable from a signed Git tag and
+backed by CI evidence. The release process does not promise byte-for-byte
+reproducible archives or images.
+
+Use Node.js 24.20.0 and Helm 3.21.4 for the checks below; CI pins the same
+versions. The minimum Go patch is declared in `go.mod`.
 
 ## Versioning
 
@@ -60,7 +65,7 @@ Each release should publish:
 - `SHA256SUMS`
 - `IMAGE_DIGEST`
 - `abra-release-gate.json`
-- A multi-architecture image at `ghcr.io/hermawan22/abra` for `linux/amd64`
+- A multi-architecture image at `ghcr.io/arconath/abra` for `linux/amd64`
   and `linux/arm64`
 - GitHub Artifact Attestations for the CLI archives, runtime bundle, `install.sh`, and
   `SHA256SUMS`
@@ -88,7 +93,7 @@ attestations. The runtime bundle should contain only the Compose material needed
 to run published images and the release `IMAGE_DIGEST` file.
 
 Do not document a container image as supported until `IMAGE_DIGEST` contains the
-image digest, the digest points at `ghcr.io/hermawan22/abra`, the image is
+image digest, the digest points at `ghcr.io/arconath/abra`, the image is
 available for both supported Linux platforms, and image provenance plus SBOM
 attestations are present in GHCR. Production deployment examples must pin the
 digest rather than relying only on mutable tags.
@@ -126,41 +131,36 @@ uploading the release assets.
 Download release artifacts and verify checksums:
 
 ```sh
+# Linux
 sha256sum -c SHA256SUMS
+
+# macOS
+shasum -a 256 -c SHA256SUMS
 ```
 
 Verify artifact provenance with GitHub CLI for every archive, the runtime bundle, `install.sh`,
 `SHA256SUMS`, `IMAGE_DIGEST`, and `abra-release-gate.json`:
 
 ```sh
-gh attestation verify --repo OWNER/REPO abra_linux_amd64.tar.gz
-gh attestation verify --repo OWNER/REPO abra_runtime_vX.Y.Z.tar.gz
-gh attestation verify --repo OWNER/REPO install.sh
-gh attestation verify --repo OWNER/REPO SHA256SUMS
-gh attestation verify --repo OWNER/REPO IMAGE_DIGEST
-gh attestation verify --repo OWNER/REPO abra-release-gate.json
+gh attestation verify --repo Arconath/abra abra_linux_amd64.tar.gz
+gh attestation verify --repo Arconath/abra abra_runtime_vX.Y.Z.tar.gz
+gh attestation verify --repo Arconath/abra install.sh
+gh attestation verify --repo Arconath/abra SHA256SUMS
+gh attestation verify --repo Arconath/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/abra abra-release-gate.json
 ```
 
 Hardened install-script verification:
 
 ```sh
-curl -fsSLO https://github.com/OWNER/REPO/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo OWNER/REPO install.sh
+curl -fsSLO https://github.com/Arconath/abra/releases/download/vX.Y.Z/install.sh
+gh attestation verify --repo Arconath/abra install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 
 The hardened installer path must install from the release archive for the
 detected platform. Do not set `ABRA_ALLOW_SOURCE_BUILD=1` when verifying a
 published release.
-
-For immutable installer provenance, download the release-pinned installer asset
-and verify its attestation before executing it:
-
-```sh
-curl -fsSLO https://github.com/OWNER/REPO/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo OWNER/REPO install.sh
-ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
-```
 
 The release workflow also runs the installer against the staged `dist`
 directory before uploading assets by setting `ABRA_RELEASE_BASE_URL` to a local
@@ -181,11 +181,11 @@ Verify and promote the first-party GHCR image by digest:
 ```sh
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 docker buildx imagetools inspect "$image_ref"
-gh attestation verify "oci://${image_ref}" --repo OWNER/REPO
+gh attestation verify "oci://${image_ref}" --repo Arconath/abra
 ```
 
 The first line of `IMAGE_DIGEST` is the digest-pinned image reference to use in
-production, for example `ghcr.io/hermawan22/abra@sha256:...`. The other lines
+production, for example `ghcr.io/arconath/abra@sha256:...`. The other lines
 list human-friendly tags for traceability only. Do not deploy from `latest` or
 from an unpinned semantic version tag.
 

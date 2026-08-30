@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hermawan22/abra/internal/ingest"
-	"github.com/hermawan22/abra/internal/observability"
+	"github.com/Arconath/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/observability"
 	"go.opentelemetry.io/otel/attribute"
 )
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/hermawan22/abra/internal/graph"
+	"github.com/Arconath/abra/internal/graph"
 )
 
 func codeGraphPath(input IngestDocumentInput) string {

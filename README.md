@@ -59,14 +59,14 @@ See:
 Install the latest release binary:
 
 ```sh
-curl -fsSL https://github.com/hermawan22/abra/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Arconath/abra/releases/latest/download/install.sh | sh
 ```
 
 For repeatable production workstations, pin and verify the release:
 
 ```sh
-curl -fsSLO https://github.com/hermawan22/abra/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo hermawan22/abra install.sh
+curl -fsSLO https://github.com/Arconath/abra/releases/download/vX.Y.Z/install.sh
+gh attestation verify --repo Arconath/abra install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 
@@ -255,14 +255,16 @@ published artifacts are CLI archives plus container images.
 
 Prerequisites:
 
-- Go 1.25.11 or newer
-- Node.js 24 or newer for maintainer scripts
+- Go 1.25.13 or newer
+- Node.js 24.20.0 for reproducible maintainer checks (`package.json` supports 24 or newer)
+- Helm 3.21.4 for deployment and release checks
 - Docker or a compatible runtime for full release-gate checks
 - Postgres with `pgvector` for local integration testing
 
 Run fast checks:
 
 ```sh
+npm ci
 go test ./...
 npm test
 ```

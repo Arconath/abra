@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/observability"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/observability"
 )
 
 func newEmbeddingProvider(cfg config.Config) (ai.EmbeddingProvider, error) {

@@ -265,7 +265,7 @@ func abraRepository() string {
 	if value := strings.TrimSpace(os.Getenv("ABRA_REPO")); value != "" {
 		return value
 	}
-	return "hermawan22/abra"
+	return "Arconath/abra"
 }
 
 func downloadRuntimeSource(ctx context.Context, targetDir string) error {
@@ -1049,9 +1049,9 @@ func defaultRuntimeImageRef() string {
 	}
 	version := runtimeVersion()
 	if version == "main" {
-		return "ghcr.io/hermawan22/abra:main"
+		return "ghcr.io/arconath/abra:main"
 	}
-	return "ghcr.io/hermawan22/abra:" + version
+	return "ghcr.io/arconath/abra:" + version
 }
 
 func firstRuntimeImageDigest() string {
@@ -1084,7 +1084,7 @@ func ensureRuntimeImageDigest(args cliArgs) error {
 	if current == "" || strings.Contains(current, "@sha256:") || current == digest {
 		return nil
 	}
-	if !strings.HasPrefix(current, "ghcr.io/hermawan22/abra:") {
+	if !strings.HasPrefix(current, "ghcr.io/arconath/abra:") {
 		return nil
 	}
 	return updateEnvValues(args, map[string]string{"ABRA_IMAGE": digest})

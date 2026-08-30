@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-REPO="${ABRA_REPO:-hermawan22/abra}"
+REPO="${ABRA_REPO:-Arconath/abra}"
 VERSION="${ABRA_VERSION:-latest}"
 INSTALL_DIR="${ABRA_INSTALL_DIR:-}"
 ALLOW_SOURCE_BUILD="${ABRA_ALLOW_SOURCE_BUILD:-0}"

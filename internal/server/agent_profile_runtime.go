@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/memory"
-	"github.com/hermawan22/abra/internal/policy"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/memory"
+	"github.com/Arconath/abra/internal/policy"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (h *handler) applyAgentProfileToCompose(ctx context.Context, input memory.ComposeInput) (memory.ComposeInput, bool, error) {

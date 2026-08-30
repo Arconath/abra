@@ -7,7 +7,7 @@ This path is for operators who want explicit YAML. The Helm chart in `deploy/hel
 Apply order:
 
 1. Provision Postgres with `pgvector`; managed Postgres is recommended.
-2. Use a published Abra image, then replace the example tag in the manifests with a digest-pinned GHCR image such as `ghcr.io/hermawan22/abra@sha256:DIGEST`.
+2. Use a published Abra image, then replace the example tag in the manifests with a digest-pinned GHCR image such as `ghcr.io/arconath/abra@sha256:DIGEST`.
 3. Create `abra-secrets` with database URL, API keys, and optional embedding/reranker provider credentials.
 4. Apply `configmap.yaml`.
 5. Delete any previous `abra-migrate` Job, run `job-migrate.yaml`, and confirm it completes.

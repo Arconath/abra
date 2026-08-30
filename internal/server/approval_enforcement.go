@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/brain"
-	"github.com/hermawan22/abra/internal/ingest"
-	"github.com/hermawan22/abra/internal/jobs"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/brain"
+	"github.com/Arconath/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/jobs"
+	"github.com/Arconath/abra/internal/store"
 )
 
 var sourceSchedulePattern = regexp.MustCompile(`^@every[[:space:]]+[1-9][0-9]*[smhd]$`)

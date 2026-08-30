@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type ThinkInput struct {

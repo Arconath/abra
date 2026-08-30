@@ -3,7 +3,7 @@ package server
 import (
 	"testing"
 
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func TestAgentProfileApprovalTarget(t *testing.T) {

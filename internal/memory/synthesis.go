@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ai"
+	"github.com/Arconath/abra/internal/ai"
 )
 
 type SynthesisResult struct {

@@ -7,12 +7,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hermawan22/abra.git"
+    "url": "git+https://github.com/Arconath/abra.git"
   },
   "bugs": {
-    "url": "https://github.com/hermawan22/abra/issues"
+    "url": "https://github.com/Arconath/abra/issues"
   },
-  "homepage": "https://github.com/hermawan22/abra#readme",
+  "homepage": "https://github.com/Arconath/abra#readme",
   "keywords": [
     "ai-agents",
     "agent-memory",

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/brain"
-	"github.com/hermawan22/abra/internal/memory"
+	"github.com/Arconath/abra/internal/brain"
+	"github.com/Arconath/abra/internal/memory"
 )
 
 func stringArg(args map[string]any, key string) string {

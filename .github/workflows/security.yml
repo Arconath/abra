@@ -28,13 +28,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "24"
+          node-version: "24.20.0"
           cache: npm
 
       - name: Setup Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: "1.25.11"
+          go-version: "1.25.13"
           cache: true
 
       - name: Install dependencies
@@ -46,7 +46,5 @@ jobs:
       - name: Check npm vulnerabilities
         run: npm audit --audit-level=high
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run pinned open-source Gitleaks CLI
+        run: ./scripts/check-gitleaks.sh

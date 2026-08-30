@@ -56,7 +56,7 @@ func TestDefaultEnvPathUsesCheckoutOnlyForAbraSourceCheckout(t *testing.T) {
 	t.Setenv("ABRA_HOME", home)
 	t.Chdir(root)
 	mustWrite(t, filepath.Join(root, "docker-compose.yml"), "services:\n  api:\n    build: .\n")
-	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/hermawan22/abra\n")
+	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/Arconath/abra\n")
 	mustWrite(t, filepath.Join(root, "cmd", "abra", "main.go"), "package main\n")
 	mustWrite(t, filepath.Join(root, "migrations", "001_init.sql"), "-- init\n")
 
@@ -81,7 +81,7 @@ func TestEnsureEnvBackfillsLegacyCheckoutQuickstartDefaults(t *testing.T) {
 	t.Chdir(root)
 	mustWrite(t, filepath.Join(root, "docker-compose.yml"), "services:\n  api:\n    build: .\n")
 	mustWrite(t, filepath.Join(root, "docker-compose.dev.yml"), "services:\n  api:\n    build: .\n")
-	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/hermawan22/abra\n")
+	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/Arconath/abra\n")
 	mustWrite(t, filepath.Join(root, "cmd", "abra", "main.go"), "package main\n")
 	mustWrite(t, filepath.Join(root, "migrations", "001_init.sql"), "-- init\n")
 	mustWrite(t, filepath.Join(root, checkoutEnvPath), strings.Join([]string{
@@ -125,7 +125,7 @@ func TestDemoEnvUsesPublishedRuntimeImageOutsideCheckout(t *testing.T) {
 	if !strings.Contains(content, "COMPOSE_FILE=docker-compose.yml\n") {
 		t.Fatalf("runtime demo env should use base compose only:\n%s", content)
 	}
-	if !strings.Contains(content, "ABRA_IMAGE=ghcr.io/hermawan22/abra:"+runtimeVersion()+"\n") {
+	if !strings.Contains(content, "ABRA_IMAGE=ghcr.io/arconath/abra:"+runtimeVersion()+"\n") {
 		t.Fatalf("runtime demo env should use published image:\n%s", content)
 	}
 	if !strings.Contains(content, "ABRA_EMBEDDING_BATCH_MAX_ITEMS=6\n") || !strings.Contains(content, "ABRA_EMBEDDING_BATCH_MAX_TOKENS=3000\n") {
@@ -147,7 +147,7 @@ func TestDemoEnvUsesRuntimeImageDigestWhenAvailable(t *testing.T) {
 	if err := os.MkdirAll(managedRuntimeDir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	digest := "ghcr.io/hermawan22/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+	digest := "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 	mustWrite(t, filepath.Join(managedRuntimeDir(), "IMAGE_DIGEST"), digest+"\n")
 
 	content := demoEnv()
@@ -162,7 +162,7 @@ func TestDemoEnvUsesLocalImageInsideSourceCheckout(t *testing.T) {
 	t.Setenv("ABRA_HOME", home)
 	t.Chdir(root)
 	mustWrite(t, filepath.Join(root, "docker-compose.yml"), "services:\n  api:\n    build: .\n")
-	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/hermawan22/abra\n")
+	mustWrite(t, filepath.Join(root, "go.mod"), "module github.com/Arconath/abra\n")
 	mustWrite(t, filepath.Join(root, "cmd", "abra", "main.go"), "package main\n")
 	mustWrite(t, filepath.Join(root, "migrations", "001_init.sql"), "-- init\n")
 
@@ -301,7 +301,7 @@ func TestRuntimeSourcePolicyAllowsExplicitMutableMainOptIn(t *testing.T) {
 }
 
 func TestRuntimeSourcePolicyRejectsMutableSourceURLWithoutOptIn(t *testing.T) {
-	t.Setenv("ABRA_SOURCE_URL", "https://github.com/hermawan22/abra/archive/refs/heads/main.tar.gz")
+	t.Setenv("ABRA_SOURCE_URL", "https://github.com/Arconath/abra/archive/refs/heads/main.tar.gz")
 	t.Setenv("ABRA_ALLOW_UNVERIFIED_SOURCE_URL", "1")
 
 	if err := validateRuntimeSourceDownloadPolicy(); err == nil || !strings.Contains(err.Error(), "mutable runtime source URL") {
@@ -444,7 +444,7 @@ func TestInitEnvUsesRuntimeBundleDigestOutsideCheckout(t *testing.T) {
 	if err := os.MkdirAll(managedRuntimeDir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	digest := "ghcr.io/hermawan22/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+	digest := "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 	mustWrite(t, filepath.Join(managedRuntimeDir(), "IMAGE_DIGEST"), digest+"\n")
 
 	if err := initEnv(cliArgs{Flags: map[string]string{}, Bools: map[string]bool{}}); err != nil {
@@ -457,7 +457,7 @@ func TestInitEnvUsesRuntimeBundleDigestOutsideCheckout(t *testing.T) {
 	if !strings.Contains(string(content), "ABRA_IMAGE="+digest+"\n") {
 		t.Fatalf("generated env should use runtime digest image:\n%s", content)
 	}
-	if strings.Contains(string(content), "ABRA_IMAGE=ghcr.io/hermawan22/abra:v9.9.9\n") {
+	if strings.Contains(string(content), "ABRA_IMAGE=ghcr.io/arconath/abra:v9.9.9\n") {
 		t.Fatalf("generated env pinned mutable tag despite runtime digest bundle:\n%s", content)
 	}
 }
@@ -479,14 +479,14 @@ func TestEnsureRuntimeImageDigestRewritesGeneratedMutableTagOutsideCheckout(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(before), "ABRA_IMAGE=ghcr.io/hermawan22/abra:v9.9.9\n") {
+	if !strings.Contains(string(before), "ABRA_IMAGE=ghcr.io/arconath/abra:v9.9.9\n") {
 		t.Fatalf("fixture env should start with mutable release tag:\n%s", before)
 	}
 
 	if err := os.MkdirAll(managedRuntimeDir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	digest := "ghcr.io/hermawan22/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+	digest := "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 	mustWrite(t, filepath.Join(managedRuntimeDir(), "IMAGE_DIGEST"), digest+"\n")
 	if err := ensureRuntimeImageDigest(cliArgs{Flags: map[string]string{}, Bools: map[string]bool{}}); err != nil {
 		t.Fatalf("ensureRuntimeImageDigest error = %v", err)
@@ -498,7 +498,7 @@ func TestEnsureRuntimeImageDigestRewritesGeneratedMutableTagOutsideCheckout(t *t
 	if !strings.Contains(string(after), "ABRA_IMAGE="+digest+"\n") {
 		t.Fatalf("env should be rewritten to digest image:\n%s", after)
 	}
-	if strings.Contains(string(after), "ABRA_IMAGE=ghcr.io/hermawan22/abra:v9.9.9\n") {
+	if strings.Contains(string(after), "ABRA_IMAGE=ghcr.io/arconath/abra:v9.9.9\n") {
 		t.Fatalf("env still pins mutable release tag:\n%s", after)
 	}
 }

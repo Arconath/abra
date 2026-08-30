@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/hermawan22/abra/internal/ai"
+	"github.com/Arconath/abra/internal/ai"
 )
 
 func (s *Service) embedTexts(ctx context.Context, inputs []string) (ai.EmbeddingResponse, error) {

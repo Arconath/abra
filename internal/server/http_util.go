@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func intQuery(r *http.Request, key string, fallback int) int {

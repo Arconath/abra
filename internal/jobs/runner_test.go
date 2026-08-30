@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/ingest"
 )
 
 func TestRunnerIngestsOnlyChangedDocuments(t *testing.T) {

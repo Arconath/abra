@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hermawan22/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/ingest"
 )
 
 func TestSourceConfigIngestSpecFromConfig(t *testing.T) {

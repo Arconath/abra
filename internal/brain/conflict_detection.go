@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 var policyUsePattern = regexp.MustCompile(`(?i)^\s*(.+?)\s+(must|should|shall|needs to|required to)\s+(not\s+)?use\s+(.+?)(?:\s+for\s+(.+?))?\s*[.!]?\s*$`)

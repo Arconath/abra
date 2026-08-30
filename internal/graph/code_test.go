@@ -61,7 +61,7 @@ func TestExtractCodeFileFindsGoImportsPackageAndSymbols(t *testing.T) {
 
 import (
 	"context"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type Composer struct{}
@@ -88,7 +88,7 @@ func helper() {}
 		{From: "internal/memory/composer.go", To: "ErrMissing", Type: "exports", Evidence: "export ErrMissing", SourceID: "doc-go", SourceURL: "file://repo/internal/memory/composer.go", Confidence: 0.72},
 		{From: "internal/memory/composer.go", To: "NewComposer", Type: "exports", Evidence: "export NewComposer", SourceID: "doc-go", SourceURL: "file://repo/internal/memory/composer.go", Confidence: 0.74},
 		{From: "internal/memory/composer.go", To: "context", Type: "imports", Evidence: "import context", SourceID: "doc-go", SourceURL: "file://repo/internal/memory/composer.go", Confidence: 0.78},
-		{From: "internal/memory/composer.go", To: "github.com/hermawan22/abra/internal/store", Type: "imports", Evidence: "import github.com/hermawan22/abra/internal/store", SourceID: "doc-go", SourceURL: "file://repo/internal/memory/composer.go", Confidence: 0.78},
+		{From: "internal/memory/composer.go", To: "github.com/Arconath/abra/internal/store", Type: "imports", Evidence: "import github.com/Arconath/abra/internal/store", SourceID: "doc-go", SourceURL: "file://repo/internal/memory/composer.go", Confidence: 0.78},
 	}
 	if !reflect.DeepEqual(got.Relations, wantRelations) {
 		t.Fatalf("relations = %#v, want %#v", got.Relations, wantRelations)

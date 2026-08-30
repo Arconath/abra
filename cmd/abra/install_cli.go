@@ -62,7 +62,7 @@ func releaseInstallScriptURL(version string) string {
 	if version == "" || version == "latest" {
 		return installScript
 	}
-	return "https://github.com/hermawan22/abra/releases/download/" + url.PathEscape(version) + "/install.sh"
+	return "https://github.com/Arconath/abra/releases/download/" + url.PathEscape(version) + "/install.sh"
 }
 
 func installScriptDownloadError(script string, err error, output []byte) error {

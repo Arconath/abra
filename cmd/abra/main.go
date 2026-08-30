@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	internalversion "github.com/hermawan22/abra/internal/version"
+	internalversion "github.com/Arconath/abra/internal/version"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 	defaultIngestTimeout  = 10 * time.Minute
 	defaultWorkerInterval = 30 * time.Second
 	maxCLIResponseBody    = 8 << 20
-	installScript         = "https://github.com/hermawan22/abra/releases/latest/download/install.sh"
+	installScript         = "https://github.com/Arconath/abra/releases/latest/download/install.sh"
 
 	directIngestBatchMaxDocuments    = 50
 	directIngestBatchMaxPayloadBytes = 4 << 20
@@ -398,7 +398,7 @@ ABRA_API_KEYS=replace-with-generated-token
 ABRA_WEBHOOK_SECRETS=replace-with-webhook-signing-secret
 ABRA_APPROVAL_MODE=enforce
 # Replace these placeholder digests with the release image digest and an operator-verified pgvector digest.
-ABRA_IMAGE=ghcr.io/hermawan22/abra@sha256:0000000000000000000000000000000000000000000000000000000000000000
+ABRA_IMAGE=ghcr.io/arconath/abra@sha256:0000000000000000000000000000000000000000000000000000000000000000
 POSTGRES_IMAGE=pgvector/pgvector@sha256:0000000000000000000000000000000000000000000000000000000000000000
 POSTGRES_USER=abra
 POSTGRES_PASSWORD=replace-with-generated-database-password

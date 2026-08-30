@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/brain"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/brain"
 )
 
 func sourceConfigSchema() map[string]any {

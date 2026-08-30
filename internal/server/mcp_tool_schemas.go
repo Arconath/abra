@@ -1,7 +1,7 @@
 package server
 
 import (
-	memory "github.com/hermawan22/abra/internal/memory"
+	memory "github.com/Arconath/abra/internal/memory"
 )
 
 func mcpTools() []map[string]any {

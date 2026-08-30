@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hermawan22/abra/internal/config"
+	"github.com/Arconath/abra/internal/config"
 )
 
 type rateLimitStore interface {
