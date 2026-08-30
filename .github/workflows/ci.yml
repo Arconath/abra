@@ -35,7 +35,7 @@ jobs:
             --env POSTGRES_USER=abra \
             --env POSTGRES_PASSWORD=abra \
             --env POSTGRES_DB=abra \
-            pgvector/pgvector:pg16
+            docker.io/pgvector/pgvector:pg16
           printf 'ABRA_POSTGRES_CONTAINER=%s\n' "$container" >>"$GITHUB_ENV"
           for _ in $(seq 1 40); do
             podman exec "$container" pg_isready -U abra -d abra && exit 0
