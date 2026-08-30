@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/ingest"
 )
 
 func (r *Runner) prepareIngestSpec(ctx context.Context, spec ingest.SourceSpec) (ingest.SourceSpec, error) {

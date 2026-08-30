@@ -21,7 +21,7 @@ spec:
       containers:
         - name: migrate
           # Replace with the release IMAGE_DIGEST, for example sha256:<64-hex-digest>.
-          image: ghcr.io/hermawan22/abra@sha256:<replace-with-release-digest>
+          image: ghcr.io/arconath/abra@sha256:<replace-with-release-digest>
           imagePullPolicy: IfNotPresent
           command: ["/app/abra-migrate"]
           securityContext:

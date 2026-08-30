@@ -191,7 +191,7 @@ async function runInstaller(options = {}) {
     ABRA_FAKE_RELEASE_DIR: releaseDir,
     ABRA_INSTALL_DIR: installDir,
     ABRA_RELEASE_BASE_URL: options.releaseBaseURL ?? `file://${releaseDir}`,
-    ABRA_REPO: 'hermawan22/abra',
+    ABRA_REPO: 'Arconath/abra',
     ABRA_VERIFY_ATTESTATION: options.attestation ?? '1',
     ABRA_FAKE_UNAME_M: options.unameM ?? 'x86_64',
     ABRA_FAKE_UNAME_S: options.unameS ?? 'Linux',

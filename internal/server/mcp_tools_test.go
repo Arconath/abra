@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/brain"
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/memory"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/brain"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/memory"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type brainToolTestStore struct {

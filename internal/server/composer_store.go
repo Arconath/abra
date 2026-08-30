@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 
-	"github.com/hermawan22/abra/internal/brain"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/brain"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type composerStore struct {

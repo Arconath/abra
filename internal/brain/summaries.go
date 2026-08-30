@@ -8,8 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/hermawan22/abra/internal/graph"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/graph"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type summaryInput struct {

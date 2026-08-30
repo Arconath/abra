@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/memory"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/memory"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func shouldAutoPersistComposeLearning(input memory.ComposeInput) bool {

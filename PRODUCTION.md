@@ -95,7 +95,7 @@ Back up the `abra-postgres` volume or, for serious production use, point `ABRA_D
 Prerequisites:
 
 - Managed Postgres with `pgvector`.
-- Access to the first-party GHCR image `ghcr.io/hermawan22/abra`, pinned by
+- Access to the first-party GHCR image `ghcr.io/arconath/abra`, pinned by
   digest from the release `IMAGE_DIGEST` asset.
 - Kubernetes Secrets management for `DATABASE_URL`, `ABRA_API_KEYS`, and embedding credentials.
 - Internal ingress or service mesh routing; do not publish Abra directly to the internet.
@@ -121,7 +121,7 @@ the first-party GHCR image digest.
 
 ## Image Provenance and Pinning
 
-Release images are published to `ghcr.io/hermawan22/abra` for `linux/amd64` and
+Release images are published to `ghcr.io/arconath/abra` for `linux/amd64` and
 `linux/arm64`. Each GitHub release includes an `IMAGE_DIGEST` asset. The first
 line is the digest-pinned image reference and the remaining lines are tag aliases
 for traceability.
@@ -130,15 +130,15 @@ Before promoting a release, verify the release-attested `IMAGE_DIGEST` file and
 the registry image provenance:
 
 ```sh
-gh attestation verify --repo hermawan22/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/abra IMAGE_DIGEST
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 docker buildx imagetools inspect "$image_ref"
-gh attestation verify "oci://${image_ref}" --repo hermawan22/abra
+gh attestation verify "oci://${image_ref}" --repo Arconath/abra
 ```
 
 BuildKit SBOM and provenance attestations are attached to the GHCR image during
 release. Treat missing SBOM/provenance, a missing platform, or a digest that
-does not start with `ghcr.io/hermawan22/abra@sha256:` as a release-blocking
+does not start with `ghcr.io/arconath/abra@sha256:` as a release-blocking
 condition. Promote and roll back by digest, not by `latest`, semantic-version
 tags, or locally rebuilt images.
 
@@ -229,7 +229,7 @@ Cluster operators should keep the included baseline NetworkPolicy enabled, or
 replace it with an equivalent service-mesh policy, and add namespace-level Pod
 Security admission, platform secret management, image-pull policy controls,
 internal-only ingress, gateway rate limits, and admission policy that requires
-`ghcr.io/hermawan22/abra@sha256:...` image references. Enable the packaged
+`ghcr.io/arconath/abra@sha256:...` image references. Enable the packaged
 ServiceMonitor and PrometheusRule only in clusters that install the Prometheus
 Operator CRDs. Do not grant the API or worker pods broad Kubernetes API access;
 the chart does not require a mounted service account token for normal operation.
@@ -499,11 +499,11 @@ with the promoted digest:
 
 ```sh
 sha256sum -c SHA256SUMS
-gh attestation verify --repo hermawan22/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/abra IMAGE_DIGEST
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
-gh attestation verify "oci://${image_ref}" --repo hermawan22/abra
+gh attestation verify "oci://${image_ref}" --repo Arconath/abra
 helm template abra deploy/helm \
-  --set image.repository=ghcr.io/hermawan22/abra \
+  --set image.repository=ghcr.io/arconath/abra \
   --set image.digest="${image_ref#*@}" \
   >/tmp/abra-rendered.yaml
 ```

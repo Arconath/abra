@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (h *handler) enqueueIngestionJob(w http.ResponseWriter, r *http.Request) {

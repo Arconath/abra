@@ -4,9 +4,9 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type Service struct {

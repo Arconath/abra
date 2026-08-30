@@ -31,8 +31,8 @@ For production hosts, install from a pinned release and require both checksum an
 GitHub Artifact Attestation verification:
 
 ```sh
-curl -fsSLO https://github.com/hermawan22/abra/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo hermawan22/abra install.sh
+curl -fsSLO https://github.com/Arconath/abra/releases/download/vX.Y.Z/install.sh
+gh attestation verify --repo Arconath/abra install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 
@@ -48,7 +48,7 @@ artifacts.
 
 ## Reporting Issues
 
-Report security issues privately through GitHub private vulnerability reporting for this repository: `https://github.com/hermawan22/abra/security/advisories/new`. If that flow is unavailable in a fork, contact the fork maintainer privately before sharing details. Do not file public issues for vulnerabilities, leaked secrets, database dumps, embeddings, or audit records.
+Report security issues privately through GitHub private vulnerability reporting for this repository: `https://github.com/Arconath/abra/security/advisories/new`. If that flow is unavailable in a fork, contact the fork maintainer privately before sharing details. Do not file public issues for vulnerabilities, leaked secrets, database dumps, embeddings, or audit records.
 
 Deployment forks should also follow their own incident and security process.
 

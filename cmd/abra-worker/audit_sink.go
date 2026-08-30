@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/store"
 )
 
 const auditSinkCursorID = "audit-sink:default"

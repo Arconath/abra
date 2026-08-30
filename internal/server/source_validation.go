@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ingest"
-	"github.com/hermawan22/abra/internal/jobs"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/jobs"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (h *handler) validateSourceConfig(w http.ResponseWriter, r *http.Request) {

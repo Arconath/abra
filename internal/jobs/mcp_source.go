@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hermawan22/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/ingest"
 )
 
 const (

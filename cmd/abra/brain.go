@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	memorypkg "github.com/hermawan22/abra/internal/memory"
+	memorypkg "github.com/Arconath/abra/internal/memory"
 )
 
 type brainEvalSuite struct {

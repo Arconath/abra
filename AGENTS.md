@@ -3,7 +3,7 @@
 ## Repository Identity and Purpose
 
 - Abra is a governed, source-cited external memory control plane for AI agents.
-- The canonical repository is `https://github.com/hermawan22/abra`.
+- The canonical repository is `https://github.com/Arconath/abra`.
 - MCP is the agent-facing contract, the CLI is the operator surface, and HTTP
   is transport for MCP, CLI fallbacks, gateways, and private automation.
 - Keep the core provider-neutral. Source-specific, tenant-specific, identity,

@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/memory"
+	"github.com/Arconath/abra/internal/memory"
 )
 
 var (

@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/observability"
-	"github.com/hermawan22/abra/internal/server"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/observability"
+	"github.com/Arconath/abra/internal/server"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func main() {

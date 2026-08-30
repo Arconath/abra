@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hermawan22/abra/internal/memory"
-	"github.com/hermawan22/abra/internal/observability"
-	"github.com/hermawan22/abra/internal/store"
-	"github.com/hermawan22/abra/internal/version"
+	"github.com/Arconath/abra/internal/memory"
+	"github.com/Arconath/abra/internal/observability"
+	"github.com/Arconath/abra/internal/store"
+	"github.com/Arconath/abra/internal/version"
 )
 
 type metricsCollector struct {

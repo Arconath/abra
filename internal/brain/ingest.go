@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/graph"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/graph"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type preparedIngestDocument struct {

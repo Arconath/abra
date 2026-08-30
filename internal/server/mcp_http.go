@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ingest"
-	"github.com/hermawan22/abra/internal/observability"
-	"github.com/hermawan22/abra/internal/store"
-	"github.com/hermawan22/abra/internal/version"
+	"github.com/Arconath/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/observability"
+	"github.com/Arconath/abra/internal/store"
+	"github.com/Arconath/abra/internal/version"
 	"go.opentelemetry.io/otel/attribute"
 )
 

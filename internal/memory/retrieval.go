@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/hermawan22/abra/internal/policy"
+import "github.com/Arconath/abra/internal/policy"
 
 type RetrievalPlan struct {
 	Mode            string                  `json:"mode"`

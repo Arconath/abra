@@ -65,7 +65,7 @@ Each release should publish:
 - `SHA256SUMS`
 - `IMAGE_DIGEST`
 - `abra-release-gate.json`
-- A multi-architecture image at `ghcr.io/hermawan22/abra` for `linux/amd64`
+- A multi-architecture image at `ghcr.io/arconath/abra` for `linux/amd64`
   and `linux/arm64`
 - GitHub Artifact Attestations for the CLI archives, runtime bundle, `install.sh`, and
   `SHA256SUMS`
@@ -93,7 +93,7 @@ attestations. The runtime bundle should contain only the Compose material needed
 to run published images and the release `IMAGE_DIGEST` file.
 
 Do not document a container image as supported until `IMAGE_DIGEST` contains the
-image digest, the digest points at `ghcr.io/hermawan22/abra`, the image is
+image digest, the digest points at `ghcr.io/arconath/abra`, the image is
 available for both supported Linux platforms, and image provenance plus SBOM
 attestations are present in GHCR. Production deployment examples must pin the
 digest rather than relying only on mutable tags.
@@ -142,19 +142,19 @@ Verify artifact provenance with GitHub CLI for every archive, the runtime bundle
 `SHA256SUMS`, `IMAGE_DIGEST`, and `abra-release-gate.json`:
 
 ```sh
-gh attestation verify --repo hermawan22/abra abra_linux_amd64.tar.gz
-gh attestation verify --repo hermawan22/abra abra_runtime_vX.Y.Z.tar.gz
-gh attestation verify --repo hermawan22/abra install.sh
-gh attestation verify --repo hermawan22/abra SHA256SUMS
-gh attestation verify --repo hermawan22/abra IMAGE_DIGEST
-gh attestation verify --repo hermawan22/abra abra-release-gate.json
+gh attestation verify --repo Arconath/abra abra_linux_amd64.tar.gz
+gh attestation verify --repo Arconath/abra abra_runtime_vX.Y.Z.tar.gz
+gh attestation verify --repo Arconath/abra install.sh
+gh attestation verify --repo Arconath/abra SHA256SUMS
+gh attestation verify --repo Arconath/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/abra abra-release-gate.json
 ```
 
 Hardened install-script verification:
 
 ```sh
-curl -fsSLO https://github.com/hermawan22/abra/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo hermawan22/abra install.sh
+curl -fsSLO https://github.com/Arconath/abra/releases/download/vX.Y.Z/install.sh
+gh attestation verify --repo Arconath/abra install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 
@@ -181,11 +181,11 @@ Verify and promote the first-party GHCR image by digest:
 ```sh
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 docker buildx imagetools inspect "$image_ref"
-gh attestation verify "oci://${image_ref}" --repo hermawan22/abra
+gh attestation verify "oci://${image_ref}" --repo Arconath/abra
 ```
 
 The first line of `IMAGE_DIGEST` is the digest-pinned image reference to use in
-production, for example `ghcr.io/hermawan22/abra@sha256:...`. The other lines
+production, for example `ghcr.io/arconath/abra@sha256:...`. The other lines
 list human-friendly tags for traceability only. Do not deploy from `latest` or
 from an unpinned semantic version tag.
 

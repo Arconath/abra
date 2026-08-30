@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hermawan22/abra/internal/config"
+	"github.com/Arconath/abra/internal/config"
 )
 
 func TestWebhookSignatureAcceptsConfiguredSecret(t *testing.T) {

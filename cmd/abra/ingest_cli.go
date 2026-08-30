@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	ingestpkg "github.com/hermawan22/abra/internal/ingest"
-	jobspkg "github.com/hermawan22/abra/internal/jobs"
+	ingestpkg "github.com/Arconath/abra/internal/ingest"
+	jobspkg "github.com/Arconath/abra/internal/jobs"
 )
 
 func seed(ctx context.Context, args cliArgs) error {

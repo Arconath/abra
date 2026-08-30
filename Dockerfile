@@ -12,7 +12,7 @@ COPY internal ./internal
 RUN set -eux; \
     goarch="${TARGETARCH:-$(go env GOARCH)}"; \
     runtime_version="${ABRA_VERSION#v}"; \
-    runtime_ldflags="-s -w -X github.com/hermawan22/abra/internal/version.Version=${runtime_version} -X github.com/hermawan22/abra/internal/version.Commit=${ABRA_COMMIT} -X github.com/hermawan22/abra/internal/version.Date=${ABRA_DATE}"; \
+    runtime_ldflags="-s -w -X github.com/Arconath/abra/internal/version.Version=${runtime_version} -X github.com/Arconath/abra/internal/version.Commit=${ABRA_COMMIT} -X github.com/Arconath/abra/internal/version.Date=${ABRA_DATE}"; \
     cli_ldflags="${runtime_ldflags} -X main.version=${ABRA_VERSION} -X main.commit=${ABRA_COMMIT} -X main.date=${ABRA_DATE}"; \
     CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${goarch}" go build -trimpath -ldflags="${runtime_ldflags}" -o /out/abra-api ./cmd/abra-api; \
     CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${goarch}" go build -trimpath -ldflags="${runtime_ldflags}" -o /out/abra-worker ./cmd/abra-worker; \

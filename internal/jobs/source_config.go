@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/ingest"
 )
 
 type SourceConfig struct {

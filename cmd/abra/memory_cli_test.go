@@ -1396,7 +1396,7 @@ func TestComposeUpStepsBuildOnlyForSourceCheckout(t *testing.T) {
 	checkout := t.TempDir()
 	mustWrite(t, filepath.Join(checkout, "docker-compose.yml"), "services: {}\n")
 	mustWrite(t, filepath.Join(checkout, "docker-compose.dev.yml"), "services: {}\n")
-	mustWrite(t, filepath.Join(checkout, "go.mod"), "module github.com/hermawan22/abra\n")
+	mustWrite(t, filepath.Join(checkout, "go.mod"), "module github.com/Arconath/abra\n")
 	mustWrite(t, filepath.Join(checkout, "cmd", "abra", "main.go"), "package main\n")
 	mustWrite(t, filepath.Join(checkout, "migrations", "001_init.sql"), "-- init\n")
 

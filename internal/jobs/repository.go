@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/ingest"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/ingest"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

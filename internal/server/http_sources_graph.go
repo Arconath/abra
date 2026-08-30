@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/policy"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/policy"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (h *handler) listSourceConfigs(w http.ResponseWriter, r *http.Request) {

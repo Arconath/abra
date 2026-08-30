@@ -1,4 +1,4 @@
-module github.com/hermawan22/abra
+module github.com/Arconath/abra
 
 go 1.25.13
 

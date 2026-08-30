@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hermawan22/abra/internal/policy"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/policy"
+	"github.com/Arconath/abra/internal/store"
 )
 
 type fakeStore struct {

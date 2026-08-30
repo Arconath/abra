@@ -59,14 +59,14 @@ See:
 Install the latest release binary:
 
 ```sh
-curl -fsSL https://github.com/hermawan22/abra/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Arconath/abra/releases/latest/download/install.sh | sh
 ```
 
 For repeatable production workstations, pin and verify the release:
 
 ```sh
-curl -fsSLO https://github.com/hermawan22/abra/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo hermawan22/abra install.sh
+curl -fsSLO https://github.com/Arconath/abra/releases/download/vX.Y.Z/install.sh
+gh attestation verify --repo Arconath/abra install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 

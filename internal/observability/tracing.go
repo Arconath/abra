@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/version"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/version"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -18,7 +18,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-const tracerName = "github.com/hermawan22/abra"
+const tracerName = "github.com/Arconath/abra"
 
 func SetupTracing(ctx context.Context, cfg config.TracingConfig, defaultServiceName string) (func(context.Context) error, error) {
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(

@@ -233,7 +233,7 @@ func TestInstallScriptDefaultsToPublishedRelease(t *testing.T) {
 	if got := releaseInstallScriptURL("latest"); got != installScript {
 		t.Fatalf("latest URL = %q, want %q", got, installScript)
 	}
-	if got := releaseInstallScriptURL("v0.3.7"); got != "https://github.com/hermawan22/abra/releases/download/v0.3.7/install.sh" {
+	if got := releaseInstallScriptURL("v0.3.7"); got != "https://github.com/Arconath/abra/releases/download/v0.3.7/install.sh" {
 		t.Fatalf("pinned URL = %q", got)
 	}
 }
@@ -290,10 +290,10 @@ func runtimeArchive(t *testing.T) []byte {
 	files := map[string]string{
 		"docker-compose.yml":      "services: {}\n",
 		"docker-compose.dev.yml":  "services:\n  api:\n    build: .\n",
-		"go.mod":                  "module github.com/hermawan22/abra\n",
+		"go.mod":                  "module github.com/Arconath/abra\n",
 		"cmd/abra/main.go":        "package main\n",
 		"migrations/001_init.sql": "-- init\n",
-		"IMAGE_DIGEST":            "ghcr.io/hermawan22/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\n",
+		"IMAGE_DIGEST":            "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\n",
 	}
 	for name, body := range files {
 		content := []byte(body)

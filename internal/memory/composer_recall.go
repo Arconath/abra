@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hermawan22/abra/internal/policy"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/policy"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (c *Composer) composeSummaryLookups(ctx context.Context, input ComposeInput) (map[string]store.MemorySummaryResult, []RetrievalTraceItem, []RetrievalWarning, error) {

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (c *Composer) activeConflicts(ctx context.Context, scope string, facts []store.ClaimResult, graph []store.RelationResult) ([]store.ConflictResult, error) {

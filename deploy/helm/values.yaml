@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/hermawan22/abra
+  repository: ghcr.io/arconath/abra
   tag: ""
   # Replace with the release IMAGE_DIGEST, for example sha256:<64-hex-digest>.
   digest: "sha256:<replace-with-release-digest>"

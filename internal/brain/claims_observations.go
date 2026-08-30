@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hermawan22/abra/internal/ai"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/ai"
+	"github.com/Arconath/abra/internal/store"
 )
 
 func (s *Service) RememberClaim(ctx context.Context, input RememberClaimInput) (RememberClaimResult, error) {

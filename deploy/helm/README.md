@@ -42,18 +42,18 @@ Install or upgrade:
 ```sh
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 helm upgrade --install abra ./deploy/helm \
-  --set image.repository=ghcr.io/hermawan22/abra \
+  --set image.repository=ghcr.io/arconath/abra \
   --set image.digest="${image_ref#*@}"
 ```
 
 `IMAGE_DIGEST` is published with each GitHub release. The first line is the
 digest-pinned GHCR image reference, such as
-`ghcr.io/hermawan22/abra@sha256:...`. Verify it before promotion:
+`ghcr.io/arconath/abra@sha256:...`. Verify it before promotion:
 
 ```sh
-gh attestation verify --repo hermawan22/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/abra IMAGE_DIGEST
 docker buildx imagetools inspect "$(sed -n '1p' IMAGE_DIGEST)"
-gh attestation verify "oci://$(sed -n '1p' IMAGE_DIGEST)" --repo hermawan22/abra
+gh attestation verify "oci://$(sed -n '1p' IMAGE_DIGEST)" --repo Arconath/abra
 ```
 
 ## Values
@@ -62,7 +62,7 @@ Important values:
 
 ```yaml
 image:
-  repository: ghcr.io/hermawan22/abra
+  repository: ghcr.io/arconath/abra
   tag: ""
   digest: sha256:...
   pullPolicy: IfNotPresent
@@ -203,7 +203,7 @@ prometheusRule:
 
 - Do not create a database by default; production should use managed Postgres with `pgvector`.
 - Do not embed secret literals in values files.
-- Use the first-party image `ghcr.io/hermawan22/abra` and set `image.digest` from the release `IMAGE_DIGEST` asset for production. Leave `image.tag` empty when a digest is set.
+- Use the first-party image `ghcr.io/arconath/abra` and set `image.digest` from the release `IMAGE_DIGEST` asset for production. Leave `image.tag` empty when a digest is set.
 - Verify `IMAGE_DIGEST` and image provenance with GitHub Artifact Attestations before promotion. Treat missing SBOM/provenance or unsupported platforms as release blockers.
 - Run migrations as Helm pre-install/pre-upgrade hooks with a delete policy or unique job names so migrations run once on every release.
 - Keep Abra internal-only by default.

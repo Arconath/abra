@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hermawan22/abra/internal/brain"
-	"github.com/hermawan22/abra/internal/config"
-	"github.com/hermawan22/abra/internal/jobs"
-	"github.com/hermawan22/abra/internal/observability"
-	"github.com/hermawan22/abra/internal/store"
+	"github.com/Arconath/abra/internal/brain"
+	"github.com/Arconath/abra/internal/config"
+	"github.com/Arconath/abra/internal/jobs"
+	"github.com/Arconath/abra/internal/observability"
+	"github.com/Arconath/abra/internal/store"
 	"go.opentelemetry.io/otel/attribute"
 )
 
