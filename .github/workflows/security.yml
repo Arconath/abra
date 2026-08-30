@@ -47,4 +47,4 @@ jobs:
         run: npm audit --audit-level=high
 
       - name: Run pinned open-source Gitleaks CLI
-        run: go run github.com/zricethezav/gitleaks/v8@v8.28.0 git --no-banner --redact --verbose .
+        run: ./scripts/check-gitleaks.sh
