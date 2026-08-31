@@ -30,10 +30,20 @@ jobs:
           # main ancestry fetch; remove it before any product code runs.
           persist-credentials: true
       - name: Verify protected source revision
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -Eeuo pipefail
           git fetch --no-tags origin main
-          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            # pull_request checks run on GitHub's synthetic merge ref. Require
+            # both protected main and the PR head to be ancestors of it.
+            [[ "$PR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+            git merge-base --is-ancestor origin/main "$GITHUB_SHA"
+            git merge-base --is-ancestor "$PR_HEAD_SHA" "$GITHUB_SHA"
+          else
+            git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          fi
           git config --local --unset-all http.https://github.com/.extraheader
       - name: Run dry release gate
         run: npm run release:gate:dry-run
