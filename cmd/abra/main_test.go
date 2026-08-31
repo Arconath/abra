@@ -293,7 +293,7 @@ func runtimeArchive(t *testing.T) []byte {
 		"go.mod":                  "module github.com/Arconath/abra\n",
 		"cmd/abra/main.go":        "package main\n",
 		"migrations/001_init.sql": "-- init\n",
-		"IMAGE_DIGEST":            "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\n",
+		"IMAGE_DIGEST":            "registry.arconath.internal/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef\n",
 	}
 	for name, body := range files {
 		content := []byte(body)

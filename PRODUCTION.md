@@ -95,34 +95,37 @@ Back up the `abra-postgres` volume or, for serious production use, point `ABRA_D
 Prerequisites:
 
 - Managed Postgres with `pgvector`.
-- Access to the first-party GHCR image `ghcr.io/arconath/abra`, pinned by
+- Access to the first-party internal Distribution registry image `registry.arconath.internal/arconath/abra`, pinned by
   digest from the release `IMAGE_DIGEST` asset.
 - Kubernetes Secrets management for `DATABASE_URL`, `ABRA_API_KEYS`, and embedding credentials.
 - Internal ingress or service mesh routing; do not publish Abra directly to the internet.
 
-Apply flow:
+Platform handoff flow:
 
 ```sh
-kubectl apply -f deploy/kubernetes/configmap.yaml
-kubectl apply -f path/to/your-abra-secret.yaml
-kubectl delete job abra-migrate --ignore-not-found
-kubectl apply -f deploy/kubernetes/job-migrate.yaml
-kubectl wait --for=condition=complete job/abra-migrate --timeout=120s
-kubectl apply -f deploy/kubernetes/deployment-api.yaml
-kubectl apply -f deploy/kubernetes/deployment-worker.yaml
-kubectl apply -f deploy/kubernetes/service.yaml
+helm lint ./deploy/helm
+helm template abra ./deploy/helm \
+  --set image.repository=registry.arconath.internal/arconath/abra \
+  --set image.digest=sha256:DIGEST \
+  > abra-rendered.yaml
 ```
 
-Before using the example secret, replace all values and preferably manage it through your platform secret store. Run the migration job once per deploy and inspect completion before rolling the API and worker. The fixed-name example Job must be deleted before each run; otherwise Kubernetes will keep the completed Job and will not rerun migrations for a later deploy.
+Submit the rendered chart and environment-specific values to
+`Arconath/platform-gitops`; Flux owns namespace, routes, secret references,
+migration execution, rollout, and rollback. Never apply production resources
+directly from this product checkout. The platform secret manager must provide
+the referenced credentials, and the migration job must complete before the API
+and worker rollout is allowed.
 
 The Helm chart is available in `deploy/helm`; render it with
-`helm template abra ./deploy/helm` and install it with your existing secret plus
-the first-party GHCR image digest.
+`helm template abra ./deploy/helm` and hand the reviewed result to the platform
+GitOps owner with the first-party internal Distribution registry image digest.
 
 ## Image Provenance and Pinning
 
-Release images are published to `ghcr.io/arconath/abra` for `linux/amd64` and
-`linux/arm64`. Each GitHub release includes an `IMAGE_DIGEST` asset. The first
+Release-control publishes approved images to
+`registry.arconath.internal/arconath/abra` for `linux/amd64` and `linux/arm64`.
+The central release intent includes an `IMAGE_DIGEST` evidence asset. The first
 line is the digest-pinned image reference and the remaining lines are tag aliases
 for traceability.
 
@@ -130,15 +133,15 @@ Before promoting a release, verify the release-attested `IMAGE_DIGEST` file and
 the registry image provenance:
 
 ```sh
-gh attestation verify --repo Arconath/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/release-control IMAGE_DIGEST
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 docker buildx imagetools inspect "$image_ref"
-gh attestation verify "oci://${image_ref}" --repo Arconath/abra
+gh attestation verify "oci://${image_ref}" --repo Arconath/release-control
 ```
 
-BuildKit SBOM and provenance attestations are attached to the GHCR image during
+BuildKit SBOM and provenance attestations are attached to the internal Distribution registry image during
 release. Treat missing SBOM/provenance, a missing platform, or a digest that
-does not start with `ghcr.io/arconath/abra@sha256:` as a release-blocking
+does not start with `registry.arconath.internal/arconath/abra@sha256:` as a release-blocking
 condition. Promote and roll back by digest, not by `latest`, semantic-version
 tags, or locally rebuilt images.
 
@@ -229,7 +232,7 @@ Cluster operators should keep the included baseline NetworkPolicy enabled, or
 replace it with an equivalent service-mesh policy, and add namespace-level Pod
 Security admission, platform secret management, image-pull policy controls,
 internal-only ingress, gateway rate limits, and admission policy that requires
-`ghcr.io/arconath/abra@sha256:...` image references. Enable the packaged
+`registry.arconath.internal/arconath/abra@sha256:...` image references. Enable the packaged
 ServiceMonitor and PrometheusRule only in clusters that install the Prometheus
 Operator CRDs. Do not grant the API or worker pods broad Kubernetes API access;
 the chart does not require a mounted service account token for normal operation.
@@ -499,11 +502,11 @@ with the promoted digest:
 
 ```sh
 sha256sum -c SHA256SUMS
-gh attestation verify --repo Arconath/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/release-control IMAGE_DIGEST
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
-gh attestation verify "oci://${image_ref}" --repo Arconath/abra
+gh attestation verify "oci://${image_ref}" --repo Arconath/release-control
 helm template abra deploy/helm \
-  --set image.repository=ghcr.io/arconath/abra \
+  --set image.repository=registry.arconath.internal/arconath/abra \
   --set image.digest="${image_ref#*@}" \
   >/tmp/abra-rendered.yaml
 ```

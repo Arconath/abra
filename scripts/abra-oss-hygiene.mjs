@@ -442,10 +442,10 @@ function runSelfTest() {
     mkdirSync("deploy/kubernetes", { recursive: true });
     writeFileSync(
       "deploy/kubernetes/bad.yaml",
-      "image: ghcr.io/example/abra@sha256:" + "0".repeat(64) + "\n"
+      "image: internal-distribution-registry.io/example/abra@sha256:" + "0".repeat(64) + "\n"
     );
     mkdirSync("deploy/helm", { recursive: true });
-    writeFileSync("deploy/helm/values.yaml", "image:\n  repository: ghcr.io/example/abra\n  digest: \"\"\n");
+    writeFileSync("deploy/helm/values.yaml", "image:\n  repository: internal-distribution-registry.io/example/abra\n  digest: \"\"\n");
     writeFileSync(
       "docker-compose.yml",
       [
@@ -460,7 +460,7 @@ function runSelfTest() {
         "  required:",
         "    image: ${ABRA_IMAGE:?set ABRA_IMAGE}",
         "  pinned:",
-        "    image: ghcr.io/example/abra@sha256:" + "0".repeat(64),
+        "    image: internal-distribution-registry.io/example/abra@sha256:" + "0".repeat(64),
         ""
       ].join("\n")
     );

@@ -398,7 +398,7 @@ ABRA_API_KEYS=replace-with-generated-token
 ABRA_WEBHOOK_SECRETS=replace-with-webhook-signing-secret
 ABRA_APPROVAL_MODE=enforce
 # Replace these placeholder digests with the release image digest and an operator-verified pgvector digest.
-ABRA_IMAGE=ghcr.io/arconath/abra@sha256:0000000000000000000000000000000000000000000000000000000000000000
+ABRA_IMAGE=registry.arconath.internal/arconath/abra@sha256:0000000000000000000000000000000000000000000000000000000000000000
 POSTGRES_IMAGE=pgvector/pgvector@sha256:0000000000000000000000000000000000000000000000000000000000000000
 POSTGRES_USER=abra
 POSTGRES_PASSWORD=replace-with-generated-database-password

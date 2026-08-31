@@ -125,7 +125,7 @@ func TestDemoEnvUsesPublishedRuntimeImageOutsideCheckout(t *testing.T) {
 	if !strings.Contains(content, "COMPOSE_FILE=docker-compose.yml\n") {
 		t.Fatalf("runtime demo env should use base compose only:\n%s", content)
 	}
-	if !strings.Contains(content, "ABRA_IMAGE=ghcr.io/arconath/abra:"+runtimeVersion()+"\n") {
+	if !strings.Contains(content, "ABRA_IMAGE=registry.arconath.internal/arconath/abra:"+runtimeVersion()+"\n") {
 		t.Fatalf("runtime demo env should use published image:\n%s", content)
 	}
 	if !strings.Contains(content, "ABRA_EMBEDDING_BATCH_MAX_ITEMS=6\n") || !strings.Contains(content, "ABRA_EMBEDDING_BATCH_MAX_TOKENS=3000\n") {
@@ -147,7 +147,7 @@ func TestDemoEnvUsesRuntimeImageDigestWhenAvailable(t *testing.T) {
 	if err := os.MkdirAll(managedRuntimeDir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	digest := "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+	digest := "registry.arconath.internal/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 	mustWrite(t, filepath.Join(managedRuntimeDir(), "IMAGE_DIGEST"), digest+"\n")
 
 	content := demoEnv()
@@ -444,7 +444,7 @@ func TestInitEnvUsesRuntimeBundleDigestOutsideCheckout(t *testing.T) {
 	if err := os.MkdirAll(managedRuntimeDir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	digest := "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+	digest := "registry.arconath.internal/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 	mustWrite(t, filepath.Join(managedRuntimeDir(), "IMAGE_DIGEST"), digest+"\n")
 
 	if err := initEnv(cliArgs{Flags: map[string]string{}, Bools: map[string]bool{}}); err != nil {
@@ -457,7 +457,7 @@ func TestInitEnvUsesRuntimeBundleDigestOutsideCheckout(t *testing.T) {
 	if !strings.Contains(string(content), "ABRA_IMAGE="+digest+"\n") {
 		t.Fatalf("generated env should use runtime digest image:\n%s", content)
 	}
-	if strings.Contains(string(content), "ABRA_IMAGE=ghcr.io/arconath/abra:v9.9.9\n") {
+	if strings.Contains(string(content), "ABRA_IMAGE=registry.arconath.internal/arconath/abra:v9.9.9\n") {
 		t.Fatalf("generated env pinned mutable tag despite runtime digest bundle:\n%s", content)
 	}
 }
@@ -479,14 +479,14 @@ func TestEnsureRuntimeImageDigestRewritesGeneratedMutableTagOutsideCheckout(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(before), "ABRA_IMAGE=ghcr.io/arconath/abra:v9.9.9\n") {
+	if !strings.Contains(string(before), "ABRA_IMAGE=registry.arconath.internal/arconath/abra:v9.9.9\n") {
 		t.Fatalf("fixture env should start with mutable release tag:\n%s", before)
 	}
 
 	if err := os.MkdirAll(managedRuntimeDir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	digest := "ghcr.io/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+	digest := "registry.arconath.internal/arconath/abra@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 	mustWrite(t, filepath.Join(managedRuntimeDir(), "IMAGE_DIGEST"), digest+"\n")
 	if err := ensureRuntimeImageDigest(cliArgs{Flags: map[string]string{}, Bools: map[string]bool{}}); err != nil {
 		t.Fatalf("ensureRuntimeImageDigest error = %v", err)
@@ -498,7 +498,7 @@ func TestEnsureRuntimeImageDigestRewritesGeneratedMutableTagOutsideCheckout(t *t
 	if !strings.Contains(string(after), "ABRA_IMAGE="+digest+"\n") {
 		t.Fatalf("env should be rewritten to digest image:\n%s", after)
 	}
-	if strings.Contains(string(after), "ABRA_IMAGE=ghcr.io/arconath/abra:v9.9.9\n") {
+	if strings.Contains(string(after), "ABRA_IMAGE=registry.arconath.internal/arconath/abra:v9.9.9\n") {
 		t.Fatalf("env still pins mutable release tag:\n%s", after)
 	}
 }

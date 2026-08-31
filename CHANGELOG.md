@@ -17,7 +17,7 @@ in the release notes.
 - Hid the removed browser UI invariant from normal `abra doctor` output so the
   operator surface stays CLI-first.
 - Clarified installer provenance modes and added an npm publish guard because
-  Abra release artifacts are GitHub CLI archives and GHCR images, not npm
+  Abra release artifacts are GitHub CLI archives and internal Distribution registry images, not npm
   packages.
 
 ### Security
