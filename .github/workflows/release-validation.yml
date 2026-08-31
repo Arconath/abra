@@ -44,7 +44,12 @@ jobs:
           else
             git merge-base --is-ancestor "$GITHUB_SHA" origin/main
           fi
-          git config --local --unset-all http.https://github.com/.extraheader
+          git config --local --unset-all http.https://github.com/.extraheader || :
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24.20.0"
+          cache: npm
       - name: Run dry release gate
         run: npm run release:gate:dry-run
       - name: Handoff exact source to central release control

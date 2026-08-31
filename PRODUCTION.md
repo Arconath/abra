@@ -111,7 +111,7 @@ helm template abra ./deploy/helm \
 ```
 
 Submit the rendered chart and environment-specific values to
-`Arconath/platform-gitops`; Flux owns namespace, routes, secret references,
+`Arconath/platform-apps`; Flux owns namespace, routes, secret references,
 migration execution, rollout, and rollback. Never apply production resources
 directly from this product checkout. The platform secret manager must provide
 the referenced credentials, and the migration job must complete before the API

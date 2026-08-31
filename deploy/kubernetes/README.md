@@ -21,7 +21,7 @@ Review and handoff order:
    the selector to your platform-owned gateway identity.
 10. If the Prometheus Operator CRDs are installed, apply `servicemonitor.yaml`
     and `prometheusrule.yaml`.
-11. Submit the reviewed manifests to `Arconath/platform-gitops`; Flux applies
+11. Submit the reviewed manifests to `Arconath/platform-apps`; Flux applies
     them only after the platform route, secret, and digest gates pass. Expose
     the service only on an internal network.
 
