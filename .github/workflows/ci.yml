@@ -28,21 +28,41 @@ jobs:
 
       - name: Start isolated PostgreSQL
         run: |
+          set -Eeuo pipefail
           test ! -S /var/run/docker.sock
           container="abra-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf 'ABRA_POSTGRES_CONTAINER=%s\n' "$container" >>"$GITHUB_ENV"
           podman run --detach --rm --name "$container" \
-            --publish 127.0.0.1:5433:5432 \
+            --publish 127.0.0.1::5432 \
             --env POSTGRES_USER=abra \
             --env POSTGRES_PASSWORD=abra \
             --env POSTGRES_DB=abra \
             docker.io/pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
-          printf 'ABRA_POSTGRES_CONTAINER=%s\n' "$container" >>"$GITHUB_ENV"
+          postgres_port="$(
+            podman port "$container" 5432/tcp |
+              awk -F: '$NF ~ /^[0-9]+$/ { print $NF; exit }'
+          )"
+          if ! [[ "$postgres_port" =~ ^[1-9][0-9]{0,4}$ ]] || (( postgres_port > 65535 )); then
+            echo "podman did not expose a valid ephemeral PostgreSQL port" >&2
+            podman logs "$container" >&2 || true
+            exit 1
+          fi
+          database_url="postgres://abra:abra@127.0.0.1:${postgres_port}/abra?sslmode=disable"
+          printf 'ABRA_POSTGRES_PORT=%s\n' "$postgres_port" >>"$GITHUB_ENV"
+          printf 'ABRA_DATABASE_URL=%s\n' "$database_url" >>"$GITHUB_ENV"
+          printf '::add-mask::%s\n' "$database_url"
+          ready=0
           for _ in $(seq 1 40); do
-            podman exec "$container" pg_isready -U abra -d abra && exit 0
+            if podman exec "$container" pg_isready -U abra -d abra; then
+              ready=1
+              break
+            fi
             sleep 2
           done
-          podman logs "$container" >&2
-          exit 1
+          if [ "$ready" -ne 1 ]; then
+            podman logs "$container" >&2
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -122,4 +142,13 @@ jobs:
 
       - name: Stop isolated PostgreSQL
         if: ${{ always() }}
-        run: podman rm --force "$ABRA_POSTGRES_CONTAINER" >/dev/null 2>&1 || true
+        run: |
+          set -Eeuo pipefail
+          container="${ABRA_POSTGRES_CONTAINER:-}"
+          test -n "$container"
+          if podman container exists "$container"; then
+            podman rm --force "$container"
+          else
+            status="$?"
+            test "$status" -eq 1
+          fi

@@ -17,6 +17,9 @@ fork_guard = "${{ github.event_name != 'pull_request' || github.event.pull_reque
 Dir[File.join(root, ".github/workflows/*.{yml,yaml}")].sort.each do |workflow_path|
   source = File.read(workflow_path)
   abort("#{workflow_path}: mounting the Docker socket is forbidden") if source.match?(/--volume\s+\/?var\/run\/docker\.sock/)
+  if source.match?(/(?:127\.0\.0\.1|localhost):[0-9]+/)
+    abort("#{workflow_path}: fixed localhost host ports are forbidden; publish disposable services as 127.0.0.1::PORT and resolve podman port")
+  end
   workflow = YAML.safe_load(source, permitted_classes: [], permitted_symbols: [], aliases: true) || {}
   (workflow["jobs"] || {}).each do |job_name, job|
     next if job.key?("uses")
