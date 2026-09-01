@@ -34,7 +34,7 @@ kubectl create secret generic abra-secrets \
 Render and inspect:
 
 ```sh
-helm template abra ./deploy/helm
+helm template abra ./deploy/helm --values ./deploy/helm/values.ci.yaml
 ```
 
 Render for platform GitOps review:

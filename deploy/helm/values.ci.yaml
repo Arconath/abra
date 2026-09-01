@@ -1,0 +1,3 @@
+# Non-deployment fixture used only to lint and render the product chart in CI.
+image:
+  digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

@@ -1,0 +1,29 @@
+%% Sources: docs/ARCHITECTURE.md; docs/COGNITIVE_ARCHITECTURE.md; docs/REPOSITORY_LAYOUT.md; docs/AI-CONTEXT.md
+flowchart LR
+  agent["AI agent"] --> mcp["MCP tools<br/>canonical agent interface"]
+  operator["Operator"] --> cli["cmd/abra<br/>CLI"]
+  mcp --> server["internal/server<br/>HTTP + MCP + auth + approvals"]
+  cli --> server
+  server --> brain["internal/brain<br/>ingest + extraction"]
+  server --> memory["internal/memory<br/>recall · working memory · decisions"]
+  brain --> extraction["internal/jobs · ingest · graph<br/>normalize + graph extraction"]
+  memory --> evidence["Evidence + citations<br/>trust / conflict / freshness"]
+  evidence --> gate["Approval + decision gate<br/>proceed · caution · review · stop"]
+  gate --> store["internal/store<br/>Postgres + pgvector"]
+  plugins["plugins<br/>source-specific adapters"] --> brain
+  migrations["cmd/abra-migrate<br/>append-only migrations"] --> store
+  api["cmd/abra-api<br/>HTTP transport"] --> server
+  worker["cmd/abra-worker<br/>background jobs"] --> brain
+  deploy["Compose / Helm<br/>self-hosted shape"] -. external secrets · routing · backup .-> store
+  blocker["Production boundary<br/>live secrets · routing · backups · digest evidence"] -.-> deploy
+
+  classDef client fill:#e8f1ff,stroke:#2563eb,color:#0f172a;
+  classDef owned fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e;
+  classDef data fill:#ecfdf5,stroke:#059669,color:#064e3b;
+  classDef boundary fill:#f3e8ff,stroke:#7c3aed,color:#3b0764;
+  classDef blocked fill:#fff7ed,stroke:#ea580c,color:#7c2d12;
+  class agent,operator client;
+  class mcp,cli,server,brain,memory,extraction,evidence,gate,api,worker owned;
+  class store data;
+  class plugins,migrations,deploy boundary;
+  class blocker blocked;

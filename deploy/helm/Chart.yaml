@@ -1,6 +1,7 @@
 apiVersion: v2
 name: abra
 description: Abra source-cited brain service for AI agents
+home: https://abra.arconath.com
 type: application
 version: 0.5.1
 appVersion: "0.5.1"

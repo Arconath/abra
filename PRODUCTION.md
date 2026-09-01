@@ -103,7 +103,7 @@ Prerequisites:
 Platform handoff flow:
 
 ```sh
-helm lint ./deploy/helm
+helm lint ./deploy/helm --set image.digest=sha256:DIGEST
 helm template abra ./deploy/helm \
   --set image.repository=registry.arconath.internal/arconath/abra \
   --set image.digest=sha256:DIGEST \
@@ -383,6 +383,7 @@ Endpoints:
 
 - `GET /healthz`
 - `GET /readyz`
+- `GET /version`
 - `GET /metrics`
 - `GET /audit/events`
 - `POST /ingest/documents`
@@ -493,8 +494,8 @@ Run before deploy:
 npm test   # maintainer docs/scripts gate; npm is not the runtime
 go test ./...
 docker build -t abra:local .
-helm lint deploy/helm
-helm template abra deploy/helm >/tmp/abra-rendered.yaml
+helm lint deploy/helm --values deploy/helm/values.ci.yaml
+helm template abra deploy/helm --values deploy/helm/values.ci.yaml >/tmp/abra-rendered.yaml
 ```
 
 For a release candidate, also verify the published artifacts and render Helm

@@ -23,6 +23,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - name: Verify isolated rootless Podman runtime
+        working-directory: .
+        run: scripts/ci/check-runner-contract.sh --runtime=podman
       - name: Enforce centralized runner contract
         run: scripts/ci/check-runner-contract.sh
 
@@ -103,10 +108,13 @@ jobs:
           version: v3.21.4
 
       - name: Lint Helm chart
-        run: helm lint ./deploy/helm
+        run: helm lint ./deploy/helm --values ./deploy/helm/values.ci.yaml
 
       - name: Render Helm chart
-        run: helm template abra ./deploy/helm >/tmp/abra-helm-template.yaml
+        run: helm template abra ./deploy/helm --values ./deploy/helm/values.ci.yaml >/tmp/abra-helm-template.yaml
+
+      - name: Prove Helm defaults fail closed
+        run: '! helm template abra ./deploy/helm >/dev/null 2>&1'
 
       - name: Render production Compose config
         run: |

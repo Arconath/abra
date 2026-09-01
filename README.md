@@ -7,6 +7,25 @@ context, and source-backed decisions before they answer questions or change
 code. Abra is intentionally not a chatbot, web dashboard, generic RAG box,
 vector database UI, or model wrapper.
 
+## Repository and launch status
+
+This checkout is the canonical Abra source repository (`github.com/Arconath/abra`)
+for the Go runtime, CLI, HTTP/MCP transport, worker, migrations, contracts,
+plugins, tests, and release/deployment validation. Repository checks and
+production procedures are present, but this checkout does not evidence a live
+deployment, published release artifact, promoted image digest, production
+secrets, backup/restore drill, or public service route.
+
+The portfolio mapping to `abra.com` is **blocked pending proof of domain and
+brand ownership**; the workspace guidance records that the live domain belongs
+to an unrelated financial firm. Do not imply that the domain is available or
+that Abra has a public web presence there. Technical self-hosting readiness and
+that separate brand/domain decision must remain distinct.
+
+Last reviewed: 2026-08-31 (documentation review date; not a claim that runtime
+state is current). Start with the [documentation index](docs/README.md),
+[AI/agent context](docs/AI-CONTEXT.md), and [current status](docs/STATUS.md).
+
 ## What Abra Is For
 
 Use Abra when an agent needs to:
@@ -288,3 +307,11 @@ Report vulnerabilities through GitHub private vulnerability reporting. See
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Maintainer documentation
+
+- [Documentation index](docs/README.md)
+- [AI/agent context](docs/AI-CONTEXT.md)
+- [Current status and blockers](docs/STATUS.md)
+- [Architecture](docs/ARCHITECTURE.md), [cognitive architecture](docs/COGNITIVE_ARCHITECTURE.md), and [repository layout](docs/REPOSITORY_LAYOUT.md)
+- [Feature freeze](docs/FEATURE_FREEZE.md), [production readiness](PRODUCTION.md), and [plugin contracts](docs/EXTENSIONS.md)

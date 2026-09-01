@@ -4,7 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
+	"strings"
 	"time"
+
+	internalversion "github.com/Arconath/abra/internal/version"
 )
 
 func removedBrowserUI(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +35,27 @@ func (h *handler) index(w http.ResponseWriter, r *http.Request) {
 		"mcp":              "POST /mcp",
 		"health":           "GET /healthz",
 		"readiness":        "GET /readyz",
+		"version":          "GET /version",
 		"operator_metrics": "GET /metrics",
 		"note":             "Abra is MCP-first for agents. REST routes are internal service transport for the CLI, MCP server, gateways, and operators; they are intentionally not advertised as a public API catalog.",
 	})
+}
+
+func (h *handler) version(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]string{
+		"service":      "abra",
+		"version":      internalversion.Version,
+		"commit":       internalversion.Commit,
+		"build_date":   internalversion.Date,
+		"image_digest": nonEmptyRuntimeIdentity(os.Getenv("IMAGE_DIGEST"), "unavailable"),
+	})
+}
+
+func nonEmptyRuntimeIdentity(value, fallback string) string {
+	if trimmed := strings.TrimSpace(value); trimmed != "" {
+		return trimmed
+	}
+	return fallback
 }
 
 func (h *handler) health(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +63,10 @@ func (h *handler) health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) ready(w http.ResponseWriter, r *http.Request) {
+	if !releaseIdentityReady() {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "release_identity_unavailable"})
+		return
+	}
 	if err := h.db.Ready(r.Context()); err != nil {
 		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": err.Error()})
 		return
