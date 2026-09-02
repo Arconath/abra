@@ -1,7 +1,7 @@
 name: Release Gate
 
 on:
-  pull_request:
+  pull_request_target:
   push:
     branches:
       - main
@@ -16,7 +16,20 @@ concurrency:
 
 jobs:
   quick-release-gate:
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    if: >-
+      ${{
+        github.repository == 'Arconath/abra' &&
+        (
+          (github.event_name == 'pull_request_target' &&
+           github.event.pull_request.head.repo.full_name == github.repository &&
+           github.event.pull_request.base.repo.full_name == github.repository &&
+           github.event.pull_request.base.ref == github.event.repository.default_branch)
+          ||
+          ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+           github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+           github.ref_protected == true)
+        )
+      }}
     runs-on:
       group: arconath-jit
       labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
@@ -25,6 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
 
       - name: Setup Node

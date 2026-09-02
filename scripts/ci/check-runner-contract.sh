@@ -42,7 +42,8 @@ ruby <<'RUBY'
 require "yaml"
 
 root = ENV.fetch("REPOSITORY_ROOT")
-repository = File.basename(root)
+checkout_name = File.basename(root)
+repository = {"spatial-studio" => "spatial"}.fetch(checkout_name, checkout_name)
 linux_runner = {
   "group" => "arconath-jit",
   "labels" => %w[self-hosted linux x64 arconath-jit rootless-buildkit],
@@ -60,7 +61,16 @@ macos_jobs = {
     "ci.yml" => {"verify" => "26.2"},
   },
 }
-fork_guard_fragment = "github.event.pull_request.head.repo.full_name == github.repository"
+expected_repository = "Arconath/#{repository}"
+provenance_fragments = {
+  "repository" => "github.repository == '#{expected_repository}'",
+  "pull_request_event" => "github.event_name == 'pull_request_target'",
+  "pull_request_head_repo" => "github.event.pull_request.head.repo.full_name == github.repository",
+  "pull_request_base_repo" => "github.event.pull_request.base.repo.full_name == github.repository",
+  "pull_request_base_ref" => "github.event.pull_request.base.ref == github.event.repository.default_branch",
+  "default_ref" => "github.ref == format('refs/heads/{0}', github.event.repository.default_branch)",
+  "protected_ref" => "github.ref_protected == true",
+}
 external_action_pin = /\A[^@\s]+@[0-9a-f]{40}\z/
 container_action_pin = /\Adocker:\/\/.+@sha256:[0-9a-f]{64}\z/
 
@@ -86,10 +96,9 @@ abort("#{root}: no workflows found") if workflow_paths.empty?
 
 workflow_paths.each do |workflow_path|
   source = File.read(workflow_path)
-  abort("#{workflow_path}: pull_request_target is forbidden on private runners") if source.match?(/^  pull_request_target:/)
   abort("#{workflow_path}: fixed localhost host ports are forbidden") if source.match?(/(?:127\.0\.0\.1|localhost):[0-9]+/)
   abort("#{workflow_path}: mounting the Docker socket is forbidden") if source.match?(/(?:--volume|-v)\s+\/?var\/run\/docker\.sock/)
-  if repository == "agentdeck"
+  if checkout_name == "agentdeck"
     if source.match?(/uses:\s*(?:actions\/setup-java|android-actions\/setup-android|subosito\/flutter-action)@/)
       abort("#{workflow_path}: mutable mobile SDK setup action is forbidden; use the immutable runner image")
     end
@@ -100,6 +109,15 @@ workflow_paths.each do |workflow_path|
   workflow = YAML.safe_load(source, permitted_classes: [], permitted_symbols: [], aliases: true) || {}
   validate_permissions!(workflow_path, "workflow permissions", workflow["permissions"])
   pull_request_workflow = source.match?(/^  pull_request:/)
+  pull_request_target_workflow = source.match?(/^  pull_request_target:/)
+  push_workflow = source.match?(/^  push:/)
+  dispatch_workflow = source.match?(/^  workflow_dispatch:/)
+  private_runner_jobs = (workflow["jobs"] || {}).values.select do |candidate|
+    candidate.is_a?(Hash) && [linux_runner, macos_runner].include?(candidate["runs-on"])
+  end
+  if private_runner_jobs.any? && pull_request_workflow
+    abort("#{workflow_path}: private pull-request jobs must use pull_request_target")
+  end
 
   (workflow["jobs"] || {}).each do |job_name, job|
     if job.key?("uses")
@@ -107,13 +125,30 @@ workflow_paths.each do |workflow_path|
       next
     end
 
-    required_xcode = macos_jobs.dig(repository, File.basename(workflow_path), job_name)
+    required_xcode = macos_jobs.dig(checkout_name, File.basename(workflow_path), job_name)
     expected_runner = required_xcode ? macos_runner : linux_runner
     actual_runner = job["runs-on"]
     abort("#{workflow_path}: #{job_name} runner contract drifted: #{actual_runner.inspect}") unless actual_runner == expected_runner
 
-    if pull_request_workflow && !job["if"].to_s.include?(fork_guard_fragment)
-      abort("#{workflow_path}: #{job_name} must fail closed for fork pull requests")
+    if [linux_runner, macos_runner].include?(actual_runner)
+      guard = job["if"].to_s
+      required_fragments = [provenance_fragments.fetch("repository")]
+      if pull_request_target_workflow
+        required_fragments.concat(provenance_fragments.values_at(
+          "pull_request_event",
+          "pull_request_head_repo",
+          "pull_request_base_repo",
+          "pull_request_base_ref",
+        ))
+      end
+      if push_workflow || dispatch_workflow
+        required_fragments.concat(provenance_fragments.values_at("default_ref", "protected_ref"))
+      end
+      required_fragments.each do |fragment|
+        unless guard.include?(fragment)
+          abort("#{workflow_path}: #{job_name} is missing provenance guard: #{fragment}")
+        end
+      end
     end
 
     strategy = job["strategy"]
@@ -149,6 +184,13 @@ workflow_paths.each do |workflow_path|
       persist_credentials = (step["with"] || {})["persist-credentials"]
       unless persist_credentials == false || persist_credentials == "false"
         abort("#{workflow_path}: #{job_name} checkout must set persist-credentials: false")
+      end
+      allowed_refs = ["${{ github.sha }}"]
+      if checkout_name == "agentdeck" && File.basename(workflow_path) == "release.yml"
+        allowed_refs << "${{ needs.source.outputs.source_sha }}"
+      end
+      unless allowed_refs.include?((step["with"] || {})["ref"])
+        abort("#{workflow_path}: #{job_name} checkout must pin the trusted source ref")
       end
     end
 
