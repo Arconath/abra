@@ -58,13 +58,20 @@ func TestVersionExposesBuildIdentity(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
 		t.Fatalf("decode body: %v", err)
 	}
-	for _, field := range []string{"service", "version", "commit", "build_date", "image_digest"} {
+	for _, field := range []string{"status", "service", "component", "product_status", "version", "commit", "build_date", "image_digest"} {
 		if body[field] == "" {
 			t.Fatalf("version response field %q is empty: %v", field, body)
 		}
 	}
-	if body["service"] != "abra" {
-		t.Fatalf("service = %q, want abra", body["service"])
+	for field, want := range map[string]string{
+		"status":         "version",
+		"service":        "abra",
+		"component":      "api",
+		"product_status": "strategic_oss",
+	} {
+		if body[field] != want {
+			t.Fatalf("%s = %q, want %q", field, body[field], want)
+		}
 	}
 	if body["image_digest"] != digest {
 		t.Fatalf("image_digest = %q, want %q", body["image_digest"], digest)
@@ -84,6 +91,49 @@ func TestProductionReadinessFailsClosedWithoutReleaseIdentity(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "release_identity_unavailable") {
 		t.Fatalf("body = %q, want release identity failure", rec.Body.String())
+	}
+	var body map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode readiness body: %v", err)
+	}
+	for field, want := range map[string]string{
+		"status":         "not_ready",
+		"service":        "abra",
+		"component":      "api",
+		"product_status": "strategic_oss",
+		"reason":         "release_identity_unavailable",
+	} {
+		if body[field] != want {
+			t.Fatalf("%s = %q, want %q", field, body[field], want)
+		}
+	}
+}
+
+func TestHealthUsesCanonicalShellIdentity(t *testing.T) {
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+
+	(&handler{}).health(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode health body: %v", err)
+	}
+	for field, want := range map[string]string{
+		"status":         "ok",
+		"service":        "abra",
+		"component":      "api",
+		"product_status": "strategic_oss",
+	} {
+		if body[field] != want {
+			t.Fatalf("%s = %v, want %q", field, body[field], want)
+		}
+	}
+	if body["ok"] != true {
+		t.Fatalf("ok = %v, want true", body["ok"])
 	}
 }
 

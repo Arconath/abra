@@ -16,11 +16,11 @@ production procedures are present, but this checkout does not evidence a live
 deployment, published release artifact, promoted image digest, production
 secrets, backup/restore drill, or public service route.
 
-The portfolio mapping to `abra.com` is **blocked pending proof of domain and
-brand ownership**; the workspace guidance records that the live domain belongs
-to an unrelated financial firm. Do not imply that the domain is available or
-that Abra has a public web presence there. Technical self-hosting readiness and
-that separate brand/domain decision must remain distinct.
+The safe initial portfolio mapping is `abra.arconath.com`. The unrelated
+`abra.com` domain is outside this rollout and must not be used, changed, or
+presented as an Abra service. This repository still does not prove that the
+safe initial hostname is live; technical self-hosting readiness, route
+activation, and the separate `abra.com` ownership decision remain distinct.
 
 Last reviewed: 2026-08-31 (documentation review date; not a claim that runtime
 state is current). Start with the [documentation index](docs/README.md),

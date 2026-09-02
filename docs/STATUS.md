@@ -2,9 +2,13 @@
 
 Last reviewed: 2026-08-31 (documentation review date; not a claim that runtime state is current).
 
-This is a repository evidence snapshot. It does not claim that a live Abra deployment, published release, or public `abra.com` service is active.
+This is a repository evidence snapshot. It does not claim that a live Abra deployment, published release, or public `abra.arconath.com` service is active.
 
-The portfolio mapping to `abra.com` is **Blocked pending proof of domain and brand ownership**. Workspace guidance records that the live domain belongs to an unrelated financial firm. Keep that decision separate from technical self-hosting readiness and do not imply that the domain is available.
+The safe initial portfolio mapping is `abra.arconath.com`. The unrelated
+`abra.com` domain is outside this rollout and must not be used or changed.
+Keep route activation and technical self-hosting readiness separate from that
+domain-ownership decision; this checkout does not prove that the safe initial
+hostname is live.
 
 ## Summary
 
@@ -29,7 +33,7 @@ or an assigned operator/support process.
 | Provider-neutral ingestion/plugins | PASS (contracted) | `docs/EXTENSIONS.md`, `docs/PLUGIN_AUTHORING.md` | Source adapters must feed normalized evidence; core owns trust |
 | Local development | PASS (documented) | README and CLI docs | Exact environment/tooling and model availability still matter |
 | Production deployment | BLOCKED until evidenced | `PRODUCTION.md` | Real secrets, internal routing, backup/restore, signed digests, and operators are required |
-| Public domain/brand mapping | BLOCKED | Workspace `AGENTS.md` | `abra.com` currently belongs to an unrelated financial firm; do not cut over |
+| Public domain/brand mapping | DEFINED / not live-evidenced | Workspace `AGENTS.md` and `platform/portfolio.yaml` | `abra.arconath.com` is the safe initial mapping; `abra.com` is outside scope and must not be cut over |
 
 ## Completed or evidenced in the repository
 
@@ -65,8 +69,9 @@ or an assigned operator/support process.
 - The repository defines production procedures but does not identify an
   executed backup/restore drill, rollback identity, on-call owner, support
   process, or customer data boundary for a live deployment.
-- The requested public `abra.com` mapping remains blocked independently of any
-  internal/self-hosted deployment decision.
+- The safe initial `abra.arconath.com` route remains unproven independently of
+  any internal/self-hosted deployment decision; `abra.com` remains outside
+  scope.
 
 ## Open gates
 
@@ -91,14 +96,15 @@ or an assigned operator/support process.
 4. Assign the operator/support and incident process, and record the live source
    of truth for routes, secrets, backups, registry state, and runtime
    configuration.
-5. Resolve the domain/brand ownership decision separately; do not treat
-   technical readiness as authorization to use `abra.com`.
+5. Verify DNS, TLS, gateway ownership, and route evidence for
+   `abra.arconath.com`; do not treat technical readiness as authorization to
+   use or change `abra.com`.
 
 ## Blockers and unknowns
 
 | ID | State | Evidence or missing source of truth | Impact / next action |
 | --- | --- | --- | --- |
-| AB-01 | Blocked | Workspace guidance says `abra.com` belongs to an unrelated financial firm and ownership proof is pending. | No public-domain cutover or availability claim; resolve ownership/brand authority separately. |
+| AB-01 | Pending | The safe initial hostname `abra.arconath.com` is recorded by the portfolio authority, but this checkout has no live DNS/TLS/route evidence. The unrelated `abra.com` domain remains outside scope. | Obtain platform-owned route and availability evidence for `abra.arconath.com`; do not cut over or modify `abra.com`. |
 | AB-02 | Pending | No published archive, checksum/attestation record, promoted image digest, or release-control result is present in the checkout. | Exact deployable artifact and provenance are unknown; obtain release evidence. |
 | AB-03 | Pending | No live deployment, route, runtime secret, API-key, webhook-secret, provider, or GitOps state is evidenced here. | Cannot assert production availability or secure exposure; obtain platform/operator records. |
 | AB-04 | Pending | No executed backup/restore drill, rollback, capacity measurement, queue-pressure result, or incident owner is recorded. | Operational readiness and recovery claims remain unproven. |

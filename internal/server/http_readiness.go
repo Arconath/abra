@@ -42,12 +42,16 @@ func (h *handler) index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) version(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("cache-control", "no-store")
 	writeJSON(w, http.StatusOK, map[string]string{
-		"service":      "abra",
-		"version":      internalversion.Version,
-		"commit":       internalversion.Commit,
-		"build_date":   internalversion.Date,
-		"image_digest": nonEmptyRuntimeIdentity(os.Getenv("IMAGE_DIGEST"), "unavailable"),
+		"status":         "version",
+		"service":        "abra",
+		"component":      "api",
+		"product_status": "strategic_oss",
+		"version":        internalversion.Version,
+		"commit":         internalversion.Commit,
+		"build_date":     internalversion.Date,
+		"image_digest":   nonEmptyRuntimeIdentity(os.Getenv("IMAGE_DIGEST"), "unavailable"),
 	})
 }
 
@@ -59,19 +63,45 @@ func nonEmptyRuntimeIdentity(value, fallback string) string {
 }
 
 func (h *handler) health(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+	w.Header().Set("cache-control", "no-store")
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":         "ok",
+		"service":        "abra",
+		"component":      "api",
+		"product_status": "strategic_oss",
+		"ok":             true,
+	})
 }
 
 func (h *handler) ready(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("cache-control", "no-store")
 	if !releaseIdentityReady() {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "release_identity_unavailable"})
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			"status":         "not_ready",
+			"service":        "abra",
+			"component":      "api",
+			"product_status": "strategic_oss",
+			"reason":         "release_identity_unavailable",
+			"error":          "release_identity_unavailable",
+		})
 		return
 	}
 	if err := h.db.Ready(r.Context()); err != nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			"status":         "not_ready",
+			"service":        "abra",
+			"component":      "api",
+			"product_status": "strategic_oss",
+			"reason":         "database_unavailable",
+			"error":          err.Error(),
+		})
 		return
 	}
 	result := map[string]any{
+		"status":               "ready",
+		"service":              "abra",
+		"component":            "api",
+		"product_status":       "strategic_oss",
 		"ok":                   true,
 		"auth_required":        len(h.cfg.APIKeys) > 0,
 		"embedding_provider":   h.cfg.Embedding.Provider,

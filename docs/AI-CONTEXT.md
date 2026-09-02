@@ -17,9 +17,10 @@ declared_toolchain:
 status_basis: repository_evidence_only
 runtime_state: unknown_not_evidenced
 public_brand_mapping:
-  requested_domain: abra.com
-  state: blocked_pending_domain_and_brand_ownership_proof
-  constraint: "workspace guidance records the live domain as belonging to an unrelated financial firm"
+  initial_domain: abra.arconath.com
+  state: safe_initial_mapping_not_live_evidenced
+  protected_external_domain: abra.com
+  constraint: "abra.com is outside this rollout and must not be used or changed; verify abra.arconath.com through platform-owned route evidence"
 product_shape: "agent-first source-cited memory control plane; not a chatbot or web dashboard"
 interfaces:
   canonical_agent: MCP
