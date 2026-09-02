@@ -1049,9 +1049,9 @@ func defaultRuntimeImageRef() string {
 	}
 	version := runtimeVersion()
 	if version == "main" {
-		return "ghcr.io/arconath/abra:main"
+		return "registry.arconath.internal/arconath/abra:main"
 	}
-	return "ghcr.io/arconath/abra:" + version
+	return "registry.arconath.internal/arconath/abra:" + version
 }
 
 func firstRuntimeImageDigest() string {
@@ -1084,7 +1084,7 @@ func ensureRuntimeImageDigest(args cliArgs) error {
 	if current == "" || strings.Contains(current, "@sha256:") || current == digest {
 		return nil
 	}
-	if !strings.HasPrefix(current, "ghcr.io/arconath/abra:") {
+	if !strings.HasPrefix(current, "registry.arconath.internal/arconath/abra:") {
 		return nil
 	}
 	return updateEnvValues(args, map[string]string{"ABRA_IMAGE": digest})

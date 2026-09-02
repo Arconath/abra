@@ -498,7 +498,7 @@ func defaultRerankerModelForProvider(provider string) string {
 }
 
 func defaultTEIImage() string {
-	return "ghcr.io/ggml-org/llama.cpp:server"
+	return "internal-distribution-registry.io/ggml-org/llama.cpp:server"
 }
 
 func validateLocalRunnerImagePolicy(args cliArgs, cfg embeddingRunnerConfig) error {

@@ -1,0 +1,68 @@
+name: Release validation (no publication)
+
+on:
+  pull_request_target:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: abra-release-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate exact source without publishing
+    if: >-
+      ${{
+        github.repository == 'Arconath/abra' &&
+        (
+          (github.event_name == 'pull_request_target' &&
+           github.event.pull_request.head.repo.full_name == github.repository &&
+           github.event.pull_request.base.repo.full_name == github.repository &&
+           github.event.pull_request.base.ref == github.event.repository.default_branch)
+          ||
+          ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+           github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+           github.ref_protected == true)
+        )
+      }}
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify protected source revision
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -Eeuo pipefail
+          git show-ref --verify --quiet refs/remotes/origin/main
+          if [[ "$GITHUB_EVENT_NAME" == pull_request_target ]]; then
+            [[ "$PR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          else
+            [[ "$GITHUB_REF" == refs/heads/main ]]
+          fi
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24.20.0"
+          cache: npm
+      - name: Run dry release gate
+        run: npm run release:gate:dry-run
+      - name: Handoff exact source to central release control
+        run: |
+          printf '%s\n' \
+            'Validation complete. Arconath/release-control is the only publisher and signer.' \
+            'Create a reviewed signed intent for this exact commit and Git tree.'

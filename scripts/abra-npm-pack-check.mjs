@@ -9,7 +9,7 @@ const cacheDir = mkdtempSync(join(tmpdir(), "abra-npm-pack-"));
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 
 if (pkg.private !== true) {
-  console.error("package.json must be private; Abra is released through GitHub archives and GHCR, not npm");
+  console.error("package.json must be private; Abra is released through GitHub archives and internal Distribution registry, not npm");
   process.exit(1);
 }
 if (!String(pkg.scripts?.prepublishOnly || "").includes("not published to npm")) {

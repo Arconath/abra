@@ -1,13 +1,15 @@
 # Kubernetes Deployment Example
 
-These manifests are generic production examples. Replace image, secrets, namespace, and ingress according to your platform.
+These manifests are generic platform input examples. Replace image, secrets,
+namespace, and ingress through the platform GitOps repository.
 
-This path is for operators who want explicit YAML. The Helm chart in `deploy/helm` packages the same roles for chart-based installs.
+This path is for platform operators who need explicit YAML. The Helm chart in
+`deploy/helm` packages the same roles for chart-based GitOps handoff.
 
-Apply order:
+Review and handoff order:
 
 1. Provision Postgres with `pgvector`; managed Postgres is recommended.
-2. Use a published Abra image, then replace the example tag in the manifests with a digest-pinned GHCR image such as `ghcr.io/arconath/abra@sha256:DIGEST`.
+2. Use a published Abra image, then replace the example tag in the manifests with a digest-pinned internal Distribution registry image such as `registry.arconath.internal/arconath/abra@sha256:DIGEST`.
 3. Create `abra-secrets` with database URL, API keys, and optional embedding/reranker provider credentials.
 4. Apply `configmap.yaml`.
 5. Delete any previous `abra-migrate` Job, run `job-migrate.yaml`, and confirm it completes.
@@ -19,14 +21,14 @@ Apply order:
    the selector to your platform-owned gateway identity.
 10. If the Prometheus Operator CRDs are installed, apply `servicemonitor.yaml`
     and `prometheusrule.yaml`.
-11. Expose the service only on an internal network.
+11. Submit the reviewed manifests to `Arconath/platform-apps`; Flux applies
+    them only after the platform route, secret, and digest gates pass. Expose
+    the service only on an internal network.
 
-Example migration flow:
+Example migration validation flow (platform-owned execution):
 
 ```sh
-kubectl delete job abra-migrate --ignore-not-found
-kubectl apply -f deploy/kubernetes/job-migrate.yaml
-kubectl wait --for=condition=complete job/abra-migrate --timeout=120s
+helm template abra ./deploy/helm --show-only templates/job-migrate.yaml
 ```
 
 Required secret keys:
@@ -55,7 +57,7 @@ Operational notes:
 - Run one or more API replicas.
 - Run one worker replica by default and raise `WORKER_CONCURRENCY` first for bounded job-level parallelism.
 - Keep runtime hardening enabled: service account tokens are not mounted, pods run as UID/GID `10001`, containers use read-only root filesystems, `/tmp` is a bounded `emptyDir`, and the worker Git cache is a bounded `emptyDir` mounted at `/var/cache/abra/git`.
-- Pin runtime images by digest, preferably from GHCR, and update the API, worker, and migration Job image fields together for each release.
+- Pin runtime images by digest, preferably from internal Distribution registry, and update the API, worker, and migration Job image fields together for each release.
 - Keep `/mcp`, recall, ingestion, graph, and source-config endpoints behind API-key auth.
 - Abra does not ship a browser UI; operate it through the CLI, API, MCP, metrics, and runbooks.
 - Treat the included NetworkPolicy, ServiceMonitor, and PrometheusRule as a baseline. Keep TLS termination, gateway authentication/rate limits, namespace Pod Security, image-policy admission, and environment-specific network exceptions in the platform layer.

@@ -43,6 +43,8 @@ spec:
             - configMapRef:
                 name: {{ include "abra.fullname" . }}-config
           env:
+            - name: IMAGE_DIGEST
+              value: {{ .Values.image.digest | quote }}
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:

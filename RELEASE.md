@@ -1,8 +1,9 @@
 # Release Process
 
-Abra releases should be rebuildable and auditable from a signed Git tag and
-backed by CI evidence. The release process does not promise byte-for-byte
-reproducible archives or images.
+Abra validation should be rebuildable and auditable from an exact Git commit and
+CI evidence. Product workflows do not publish, sign, or deploy; protected
+`Arconath/release-control` produces the approved archives, image signatures, and
+promotion evidence.
 
 Use Node.js 24.20.0 and Helm 3.21.4 for the checks below; CI pins the same
 versions. The minimum Go patch is declared in `go.mod`.
@@ -11,7 +12,8 @@ versions. The minimum Go patch is declared in `go.mod`.
 
 - Use semantic versions: `vMAJOR.MINOR.PATCH`.
 - Keep `package.json`, `package-lock.json`, `deploy/helm/Chart.yaml`, chart `appVersion`, and `CHANGELOG.md` aligned before tagging.
-- Before v1.0.0, document any breaking change in `CHANGELOG.md` and the GitHub release notes.
+- Before v1.0.0, document any breaking change in `CHANGELOG.md` and the
+  release-control intent notes.
 - Existing public tags through `v0.4.0` are historical. Do not rewrite them;
   publish later OSS candidates with a new SemVer tag.
 - Patch releases contain compatible fixes only.
@@ -54,7 +56,7 @@ npm audit --audit-level=high
 
 ## Artifacts
 
-Each release should publish:
+Each approved release-control intent should publish:
 
 - `abra_linux_amd64.tar.gz`
 - `abra_linux_arm64.tar.gz`
@@ -65,15 +67,15 @@ Each release should publish:
 - `SHA256SUMS`
 - `IMAGE_DIGEST`
 - `abra-release-gate.json`
-- A multi-architecture image at `ghcr.io/arconath/abra` for `linux/amd64`
+- A multi-architecture image at `registry.arconath.internal/arconath/abra` for `linux/amd64`
   and `linux/arm64`
-- GitHub Artifact Attestations for the CLI archives, runtime bundle, `install.sh`, and
+- Release-control artifact attestations for the CLI archives, runtime bundle, `install.sh`, and
   `SHA256SUMS`
-- GitHub Artifact Attestations for `IMAGE_DIGEST` and `abra-release-gate.json`
-- Registry-attached image provenance and SBOM attestations for the GHCR image
+- Release-control artifact attestations for `IMAGE_DIGEST` and `abra-release-gate.json`
+- Registry-attached image provenance and SBOM attestations for the internal Distribution registry image
 
 The npm package metadata is private developer tooling only. Do not publish Abra
-to npm as a release artifact; the Go CLI archives and the GHCR image are the
+to npm as a release artifact; the Go CLI archives and the internal Distribution registry image are the
 published runtime artifacts. Keep `package.json` marked private with a hard
 `prepublishOnly` guard so npm publication fails before upload.
 
@@ -93,9 +95,9 @@ attestations. The runtime bundle should contain only the Compose material needed
 to run published images and the release `IMAGE_DIGEST` file.
 
 Do not document a container image as supported until `IMAGE_DIGEST` contains the
-image digest, the digest points at `ghcr.io/arconath/abra`, the image is
+image digest, the digest points at `registry.arconath.internal/arconath/abra`, the image is
 available for both supported Linux platforms, and image provenance plus SBOM
-attestations are present in GHCR. Production deployment examples must pin the
+attestations are present in internal Distribution registry. Production deployment examples must pin the
 digest rather than relying only on mutable tags.
 
 All external GitHub Actions used by CI, security, release-gate, and release
@@ -115,16 +117,14 @@ git tag -s vX.Y.Z -m "Abra vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
-The release workflow rejects lightweight tags, unsigned or unverified tag
+The product validation workflow rejects lightweight tags, unsigned or unverified tag
 signatures, and release tags whose version does not match `package.json`,
 `deploy/helm/Chart.yaml`, chart `appVersion`, and the latest numbered
 `CHANGELOG.md` entry, and a commit reachable from `origin/main`. It then runs
 Go and npm vulnerability checks and the full managed release gate before
-building CLI archives, verifying `SHA256SUMS`, creating GitHub Artifact
-Attestations, verifying those attestations, verifying the staged install script
-path against the archive that will be uploaded, publishing the
-multi-architecture GHCR image with provenance and SBOM attestations, and
-uploading the release assets.
+emitting unsigned CLI/archive/image evidence. Release-control separately
+verifies that evidence, signs and publishes the multi-architecture internal
+Distribution registry image, and creates the release assets.
 
 ## Verification
 
@@ -142,19 +142,19 @@ Verify artifact provenance with GitHub CLI for every archive, the runtime bundle
 `SHA256SUMS`, `IMAGE_DIGEST`, and `abra-release-gate.json`:
 
 ```sh
-gh attestation verify --repo Arconath/abra abra_linux_amd64.tar.gz
-gh attestation verify --repo Arconath/abra abra_runtime_vX.Y.Z.tar.gz
-gh attestation verify --repo Arconath/abra install.sh
-gh attestation verify --repo Arconath/abra SHA256SUMS
-gh attestation verify --repo Arconath/abra IMAGE_DIGEST
-gh attestation verify --repo Arconath/abra abra-release-gate.json
+gh attestation verify --repo Arconath/release-control abra_linux_amd64.tar.gz
+gh attestation verify --repo Arconath/release-control abra_runtime_vX.Y.Z.tar.gz
+gh attestation verify --repo Arconath/release-control install.sh
+gh attestation verify --repo Arconath/release-control SHA256SUMS
+gh attestation verify --repo Arconath/release-control IMAGE_DIGEST
+gh attestation verify --repo Arconath/release-control abra-release-gate.json
 ```
 
 Hardened install-script verification:
 
 ```sh
 curl -fsSLO https://github.com/Arconath/abra/releases/download/vX.Y.Z/install.sh
-gh attestation verify --repo Arconath/abra install.sh
+gh attestation verify --repo Arconath/release-control install.sh
 ABRA_VERSION=vX.Y.Z ABRA_VERIFY_ATTESTATION=1 sh install.sh
 ```
 
@@ -162,10 +162,11 @@ The hardened installer path must install from the release archive for the
 detected platform. Do not set `ABRA_ALLOW_SOURCE_BUILD=1` when verifying a
 published release.
 
-The release workflow also runs the installer against the staged `dist`
-directory before uploading assets by setting `ABRA_RELEASE_BASE_URL` to a local
-file URL. This variable is for release verification only; normal users should
-install from the published GitHub release URL above.
+The central release-control workflow also runs the installer against the staged
+`dist` directory before publishing assets by setting `ABRA_RELEASE_BASE_URL` to
+a local file URL. This variable is for release verification only; normal users
+should install from the release URL recorded by the approved release-control
+intent.
 
 Release-installed `abra up` downloads `abra_runtime_vX.Y.Z.tar.gz` from the same
 release base URL, verifies the bundle checksum against `SHA256SUMS`, and uses
@@ -173,19 +174,19 @@ the bundle's `IMAGE_DIGEST` first line as the default `ABRA_IMAGE`. Set
 `ABRA_VERIFY_RUNTIME_ATTESTATION=1` to require runtime bundle and `SHA256SUMS`
 attestation verification during runtime download.
 
-For the first-party GHCR image, prefer digests over mutable tags in production
+For the first-party internal Distribution registry image, prefer digests over mutable tags in production
 deploy manifests.
 
-Verify and promote the first-party GHCR image by digest:
+Verify and promote the first-party internal Distribution registry image by digest:
 
 ```sh
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
 docker buildx imagetools inspect "$image_ref"
-gh attestation verify "oci://${image_ref}" --repo Arconath/abra
+gh attestation verify "oci://${image_ref}" --repo Arconath/release-control
 ```
 
 The first line of `IMAGE_DIGEST` is the digest-pinned image reference to use in
-production, for example `ghcr.io/arconath/abra@sha256:...`. The other lines
+production, for example `registry.arconath.internal/arconath/abra@sha256:...`. The other lines
 list human-friendly tags for traceability only. Do not deploy from `latest` or
 from an unpinned semantic version tag.
 

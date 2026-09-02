@@ -1,4 +1,6 @@
-FROM golang:1.25.13-bookworm AS build
+# Keep builder and runtime roots immutable. Update these digests only after an
+# operator verifies the upstream manifest, CVE report, and provenance.
+FROM golang:1.25.13-bookworm@sha256:e401dae1bf814e29204a8cb7915682e1780951e609ca0dd8865ee1937f510c48 AS build
 WORKDIR /src
 ARG ABRA_VERSION=dev
 ARG ABRA_COMMIT=unknown
@@ -19,7 +21,7 @@ RUN set -eux; \
     CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${goarch}" go build -trimpath -ldflags="${runtime_ldflags}" -o /out/abra-migrate ./cmd/abra-migrate; \
     CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${goarch}" go build -trimpath -ldflags="${cli_ldflags}" -o /out/abra ./cmd/abra
 
-FROM debian:bookworm-slim AS runtime
+FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apt-get update \

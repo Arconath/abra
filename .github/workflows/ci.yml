@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  pull_request:
+  pull_request_target:
   push:
     branches:
       - main
@@ -15,26 +15,73 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-24.04
-
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_USER: abra
-          POSTGRES_PASSWORD: abra
-          POSTGRES_DB: abra
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U abra -d abra"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
+    if: >-
+      ${{
+        github.repository == 'Arconath/abra' &&
+        (
+          (github.event_name == 'pull_request_target' &&
+           github.event.pull_request.head.repo.full_name == github.repository &&
+           github.event.pull_request.base.repo.full_name == github.repository &&
+           github.event.pull_request.base.ref == github.event.repository.default_branch)
+          ||
+          ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+           github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+           github.ref_protected == true)
+        )
+      }}
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
 
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify isolated rootless Podman runtime
+        working-directory: .
+        run: scripts/ci/check-runner-contract.sh --runtime=podman
+      - name: Enforce centralized runner contract
+        run: scripts/ci/check-runner-contract.sh
+
+      - name: Start isolated PostgreSQL
+        run: |
+          set -Eeuo pipefail
+          test ! -S /var/run/docker.sock
+          container="abra-postgres-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf 'ABRA_POSTGRES_CONTAINER=%s\n' "$container" >>"$GITHUB_ENV"
+          podman run --detach --rm --name "$container" \
+            --publish 127.0.0.1::5432 \
+            --env POSTGRES_USER=abra \
+            --env POSTGRES_PASSWORD=abra \
+            --env POSTGRES_DB=abra \
+            docker.io/pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+          postgres_port="$(
+            podman port "$container" 5432/tcp |
+              awk -F: '$NF ~ /^[0-9]+$/ { print $NF; exit }'
+          )"
+          if ! [[ "$postgres_port" =~ ^[1-9][0-9]{0,4}$ ]] || (( postgres_port > 65535 )); then
+            echo "podman did not expose a valid ephemeral PostgreSQL port" >&2
+            podman logs "$container" >&2 || true
+            exit 1
+          fi
+          database_url="postgres://abra:abra@127.0.0.1:${postgres_port}/abra?sslmode=disable"
+          printf 'ABRA_POSTGRES_PORT=%s\n' "$postgres_port" >>"$GITHUB_ENV"
+          printf 'ABRA_DATABASE_URL=%s\n' "$database_url" >>"$GITHUB_ENV"
+          printf '::add-mask::%s\n' "$database_url"
+          ready=0
+          for _ in $(seq 1 40); do
+            if podman exec "$container" pg_isready -U abra -d abra; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            podman logs "$container" >&2
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -75,15 +122,18 @@ jobs:
           version: v3.21.4
 
       - name: Lint Helm chart
-        run: helm lint ./deploy/helm
+        run: helm lint ./deploy/helm --values ./deploy/helm/values.ci.yaml
 
       - name: Render Helm chart
-        run: helm template abra ./deploy/helm >/tmp/abra-helm-template.yaml
+        run: helm template abra ./deploy/helm --values ./deploy/helm/values.ci.yaml >/tmp/abra-helm-template.yaml
+
+      - name: Prove Helm defaults fail closed
+        run: '! helm template abra ./deploy/helm >/dev/null 2>&1'
 
       - name: Render production Compose config
         run: |
           cat > /tmp/abra.env.production.test <<'EOF'
-          POSTGRES_IMAGE=pgvector/pgvector:pg16
+          POSTGRES_IMAGE=docker.io/pgvector/pgvector:pg16@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
           POSTGRES_PASSWORD=test-postgres-password
           ABRA_IMAGE=abra:test
           ABRA_DATABASE_URL=postgres://abra:test-postgres-password@postgres:5432/abra?sslmode=disable
@@ -97,7 +147,7 @@ jobs:
           EMBEDDING_DIMENSIONS=1536
           ALLOW_LOCAL_EMBEDDINGS_IN_PRODUCTION=false
           EOF
-          docker compose --env-file /tmp/abra.env.production.test --profile setup config >/tmp/abra-compose-config.yaml
+          podman compose --env-file /tmp/abra.env.production.test --profile setup config >/tmp/abra-compose-config.yaml
 
       - name: Check public repo hygiene
         run: npm run check:oss
@@ -110,4 +160,17 @@ jobs:
           go build ./cmd/abra
 
       - name: Build container image
-        run: docker build -t abra:${{ github.sha }} .
+        run: podman build -t abra:${{ github.sha }} .
+
+      - name: Stop isolated PostgreSQL
+        if: ${{ always() }}
+        run: |
+          set -Eeuo pipefail
+          container="${ABRA_POSTGRES_CONTAINER:-}"
+          test -n "$container"
+          if podman container exists "$container"; then
+            podman rm --force "$container"
+          else
+            status="$?"
+            test "$status" -eq 1
+          fi

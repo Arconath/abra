@@ -34,26 +34,27 @@ kubectl create secret generic abra-secrets \
 Render and inspect:
 
 ```sh
-helm template abra ./deploy/helm
+helm template abra ./deploy/helm --values ./deploy/helm/values.ci.yaml
 ```
 
-Install or upgrade:
+Render for platform GitOps review:
 
 ```sh
 image_ref="$(sed -n '1p' IMAGE_DIGEST)"
-helm upgrade --install abra ./deploy/helm \
-  --set image.repository=ghcr.io/arconath/abra \
-  --set image.digest="${image_ref#*@}"
+helm template abra ./deploy/helm \
+  --set image.repository=registry.arconath.internal/arconath/abra \
+  --set image.digest="${image_ref#*@}" \
+  > abra-rendered.yaml
 ```
 
-`IMAGE_DIGEST` is published with each GitHub release. The first line is the
-digest-pinned GHCR image reference, such as
-`ghcr.io/arconath/abra@sha256:...`. Verify it before promotion:
+`IMAGE_DIGEST` is published by protected release-control. The first line is the
+digest-pinned internal Distribution registry image reference, such as
+`registry.arconath.internal/arconath/abra@sha256:...`. Verify it before promotion:
 
 ```sh
-gh attestation verify --repo Arconath/abra IMAGE_DIGEST
+gh attestation verify --repo Arconath/release-control IMAGE_DIGEST
 docker buildx imagetools inspect "$(sed -n '1p' IMAGE_DIGEST)"
-gh attestation verify "oci://$(sed -n '1p' IMAGE_DIGEST)" --repo Arconath/abra
+gh attestation verify "oci://$(sed -n '1p' IMAGE_DIGEST)" --repo Arconath/release-control
 ```
 
 ## Values
@@ -62,7 +63,7 @@ Important values:
 
 ```yaml
 image:
-  repository: ghcr.io/arconath/abra
+  repository: registry.arconath.internal/arconath/abra
   tag: ""
   digest: sha256:...
   pullPolicy: IfNotPresent
@@ -203,14 +204,16 @@ prometheusRule:
 
 - Do not create a database by default; production should use managed Postgres with `pgvector`.
 - Do not embed secret literals in values files.
-- Use the first-party image `ghcr.io/arconath/abra` and set `image.digest` from the release `IMAGE_DIGEST` asset for production. Leave `image.tag` empty when a digest is set.
-- Verify `IMAGE_DIGEST` and image provenance with GitHub Artifact Attestations before promotion. Treat missing SBOM/provenance or unsupported platforms as release blockers.
+- Use the first-party image `registry.arconath.internal/arconath/abra` and set `image.digest` from the release `IMAGE_DIGEST` asset for production. Leave `image.tag` empty when a digest is set.
+- Verify `IMAGE_DIGEST` and image provenance from protected release-control
+  attestations before promotion. Treat missing SBOM/provenance or unsupported
+  platforms as release blockers.
 - Run migrations as Helm pre-install/pre-upgrade hooks with a delete policy or unique job names so migrations run once on every release.
 - Keep Abra internal-only by default.
 - Keep the rendered pod hardening controls: non-root UID/GID, `RuntimeDefault` seccomp, disabled service-account token automount, read-only root filesystem, dropped capabilities, resource requests/limits, and bounded writable `emptyDir` mounts.
 - Keep `networkPolicy.enabled=true` for the baseline internal-only posture. Add `networkPolicy.extraApiIngress` entries for ingress gateways, Prometheus, or agent runtimes outside the release namespace, or replace it with an equivalent service-mesh policy.
 - Enable `serviceMonitor.enabled` and `prometheusRule.enabled` only when the Prometheus Operator CRDs are installed in the cluster. Create `serviceMonitor.bearerTokenSecret.name` with a `token` value that is authorized for ops access to `GET /metrics`; the chart does not copy API keys into monitoring secrets.
-- Add namespace Pod Security, internal ingress, gateway rate limits, and admission rules that require digest-pinned GHCR images in the target cluster.
+- Add namespace Pod Security, internal ingress, gateway rate limits, and admission rules that require digest-pinned internal Distribution registry images in the target cluster.
 - Keep `config.bindAddress="0.0.0.0"` for containerized API pods and restrict exposure through the Service, Ingress, gateway, or network policy layers.
 - Keep `config.approvalMode=enforce` before exposing write-capable credentials to autonomous agents.
 - Keep `ABRA_WEBHOOK_SECRETS` present in the existing secret. The chart requires it by default for the migration, API, and worker pods; set `config.allowUnsignedWebhooksInProduction="true"` only when webhook ingestion is disabled or an upstream gateway verifies webhook signatures.

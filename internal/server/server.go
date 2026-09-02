@@ -41,6 +41,7 @@ func New(cfg config.Config, db *store.Store) (http.Handler, error) {
 	mux.HandleFunc("GET /app/", removedBrowserUI)
 	mux.HandleFunc("GET /healthz", handler.health)
 	mux.HandleFunc("GET /readyz", handler.ready)
+	mux.HandleFunc("GET /version", handler.version)
 	mux.HandleFunc("GET /metrics", handler.auth(handler.metricsText))
 	mux.HandleFunc("GET /audit/events", handler.auth(handler.auditEvents))
 	mux.HandleFunc("POST /ingest/documents", handler.auth(handler.ingestDocument))

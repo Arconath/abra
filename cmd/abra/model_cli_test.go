@@ -1178,7 +1178,7 @@ func TestEmbeddingRunnerUsesLocalQwenDefaults(t *testing.T) {
 	if cfg.ReadinessTimeout != 10*time.Second {
 		t.Fatalf("readiness timeout = %s", cfg.ReadinessTimeout)
 	}
-	wantImage := "ghcr.io/ggml-org/llama.cpp:server"
+	wantImage := "internal-distribution-registry.io/ggml-org/llama.cpp:server"
 	if cfg.Image != wantImage {
 		t.Fatalf("image = %q, want %q", cfg.Image, wantImage)
 	}
@@ -1243,7 +1243,7 @@ func TestProductionLocalRunnerRequiresDigestPinnedImage(t *testing.T) {
 	if err := updateEnvValues(args, map[string]string{
 		"EMBEDDING_PROVIDER":                   "local",
 		"ALLOW_LOCAL_EMBEDDINGS_IN_PRODUCTION": "false",
-		"ABRA_LOCAL_EMBEDDING_IMAGE":           "ghcr.io/ggml-org/llama.cpp:server",
+		"ABRA_LOCAL_EMBEDDING_IMAGE":           "internal-distribution-registry.io/ggml-org/llama.cpp:server",
 	}); err != nil {
 		t.Fatalf("update env error = %v", err)
 	}

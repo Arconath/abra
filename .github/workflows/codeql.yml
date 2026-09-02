@@ -1,12 +1,10 @@
 name: CodeQL
 
 on:
-  pull_request:
+  pull_request_target:
   push:
     branches:
       - main
-  schedule:
-    - cron: "31 2 * * 2"
 
 permissions:
   contents: read
@@ -18,14 +16,48 @@ concurrency:
 
 jobs:
   analyze:
-    runs-on: ubuntu-24.04
+    if: >-
+      ${{
+        github.repository == 'Arconath/abra' &&
+        (
+          (github.event_name == 'pull_request_target' &&
+           github.event.pull_request.head.repo.full_name == github.repository &&
+           github.event.pull_request.base.repo.full_name == github.repository &&
+           github.event.pull_request.base.ref == github.event.repository.default_branch)
+          ||
+          ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+           github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+           github.ref_protected == true)
+        )
+      }}
+    runs-on:
+      group: arconath-jit
+      labels: [self-hosted, linux, x64, arconath-jit, rootless-buildkit]
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         language: ["go", "javascript-typescript"]
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Enforce centralized runner contract
+        run: scripts/ci/check-runner-contract.sh
+      - name: Setup Go
+        if: ${{ matrix.language == 'go' }}
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Setup Node
+        if: ${{ matrix.language == 'javascript-typescript' }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24.20.0"
+          cache: npm
       - name: Initialize CodeQL
         uses: github/codeql-action/init@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3
         with:

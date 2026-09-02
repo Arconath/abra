@@ -228,13 +228,26 @@ function helmImageDigestFindings(files) {
     return [];
   }
   const findings = [];
+  const helperFile = "deploy/helm/templates/_helpers.tpl";
+  let helpers = "";
+  if (files.includes(helperFile)) {
+    try {
+      helpers = readFileSync(helperFile, "utf8");
+    } catch {
+      helpers = "";
+    }
+  }
+  const emptyDigestFailsClosed =
+    /required\s+["'][^"']*["']\s+\.Values\.image\.digest/.test(helpers) &&
+    /regexMatch\s+["']\^sha256:\[a-f0-9\]\{64\}\\?\$["']/.test(helpers) &&
+    /fail\s+["'][^"']*digest/i.test(helpers);
   const emptyDigest = /^\s*digest:\s*["']?["']?\s*$/m.exec(content);
-  if (emptyDigest) {
+  if (emptyDigest && !emptyDigestFailsClosed) {
     findings.push({
       file,
       line: lineNumberFor(content, emptyDigest.index),
       rule: "helm_image_digest_required",
-      message: "Helm defaults must render digest-pinned images instead of mutable version tags"
+      message: "Helm defaults must either fail closed or render digest-pinned images instead of mutable version tags"
     });
   }
   const placeholderDigest = /^\s*digest:\s*["']?sha256:0{64}["']?\s*$/m.exec(content);
@@ -442,10 +455,10 @@ function runSelfTest() {
     mkdirSync("deploy/kubernetes", { recursive: true });
     writeFileSync(
       "deploy/kubernetes/bad.yaml",
-      "image: ghcr.io/example/abra@sha256:" + "0".repeat(64) + "\n"
+      "image: internal-distribution-registry.io/example/abra@sha256:" + "0".repeat(64) + "\n"
     );
     mkdirSync("deploy/helm", { recursive: true });
-    writeFileSync("deploy/helm/values.yaml", "image:\n  repository: ghcr.io/example/abra\n  digest: \"\"\n");
+    writeFileSync("deploy/helm/values.yaml", "image:\n  repository: internal-distribution-registry.io/example/abra\n  digest: \"\"\n");
     writeFileSync(
       "docker-compose.yml",
       [
@@ -460,7 +473,7 @@ function runSelfTest() {
         "  required:",
         "    image: ${ABRA_IMAGE:?set ABRA_IMAGE}",
         "  pinned:",
-        "    image: ghcr.io/example/abra@sha256:" + "0".repeat(64),
+        "    image: internal-distribution-registry.io/example/abra@sha256:" + "0".repeat(64),
         ""
       ].join("\n")
     );
@@ -508,6 +521,25 @@ function runSelfTest() {
     const helmFindings = helmImageDigestFindings(["deploy/helm/values.yaml"]);
     assertSelfTest(helmFindings.length === 1, `expected 1 Helm image digest finding, got ${helmFindings.length}`);
     assertSelfTest(helmFindings[0].rule === "helm_image_digest_required", "expected Helm image digest rule");
+    mkdirSync("deploy/helm/templates", { recursive: true });
+    writeFileSync(
+      "deploy/helm/templates/_helpers.tpl",
+      [
+        '{{- $digest := required "image.digest is required" .Values.image.digest -}}',
+        '{{- if not (regexMatch "^sha256:[a-f0-9]{64}$" $digest) -}}',
+        '{{- fail "image digest must be immutable" -}}',
+        '{{- end -}}',
+        ""
+      ].join("\n")
+    );
+    const failClosedHelmFindings = helmImageDigestFindings([
+      "deploy/helm/values.yaml",
+      "deploy/helm/templates/_helpers.tpl"
+    ]);
+    assertSelfTest(
+      failClosedHelmFindings.length === 0,
+      `expected fail-closed empty Helm defaults to be accepted, got ${failClosedHelmFindings.length}`
+    );
     const composeFindings = composeProductionImageFindings(["docker-compose.yml", "docker-compose.dev.yml"]);
     assertSelfTest(composeFindings.length === 4, `expected 4 Compose image findings, got ${composeFindings.length}`);
     assertSelfTest(
